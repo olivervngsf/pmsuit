@@ -1,0 +1,239 @@
+// =============================================================================
+// PM Suite data model
+// =============================================================================
+// Designed around *alignment*, not just task tracking. The hierarchy mirrors how
+// a company actually drives outcomes:
+//
+//   Company (mission / current period)
+//     └─ Initiative .......... a strategic bet, aligned to company needs
+//          ├─ Outcome ........ measurable success metric (OKR-style key result),
+//          │                    owned by a Team — this is the layer *everyone*
+//          │                    can check without seeing granular work
+//          └─ Project ........ a delivery vehicle that creates impact toward the
+//               │              initiative; belongs to one Team
+//               ├─ Task ...... execution detail (team-internal, not shared up)
+//               └─ Milestone . a dated checkpoint
+//
+//   CheckIn ................... a weekly status update (AI-generated or manual),
+//                              attachable to a Project or an Initiative
+//
+// SQLite for zero-config dev. The schema is Postgres-portable: only the
+// datasource `provider` changes to migrate to a hosted DB later.
+//
+// SWAPPING DUMMY DATA FOR REAL DATA
+// ---------------------------------
+// All seed/demo content lives in prisma/seed.ts and is clearly marked as fake.
+// The app never hardcodes data — every page reads through the typed query layer
+// in src/lib/queries.ts. To go live: point DATABASE_URL at a real DB, replace
+// the seed with an import from your source of truth (Jira, Linear, a CSV, an
+// API), and the UI keeps working unchanged.
+// =============================================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A single-row table describing the organization the suite is run for.
+model Company {
+  id        String   @id @default("company")
+  name      String
+  mission   String?
+  // The strategic period everything is currently being measured against,
+  // e.g. "Q3 2026" or "H2 2026".
+  period    String   @default("Q3 2026")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// A cross-functional group that owns work and outcomes.
+// Examples: Marketing, Design, Engineering, Product, Data.
+model Team {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  // Short slug used in URLs, e.g. "engineering".
+  slug      String   @unique
+  // Tailwind-friendly hex used for chips/charts.
+  color     String   @default("#6366f1")
+  lead      String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  members   Member[]
+  projects  Project[]
+  outcomes  Outcome[]
+
+  @@index([slug])
+}
+
+// A person. Realistic fake people seed the demo; swap for real users later.
+model Member {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  role      String?  // e.g. "Senior PM", "Design Lead"
+  avatar    String?  // optional emoji or URL
+  createdAt DateTime @default(now())
+
+  team      Team?    @relation(fields: [teamId], references: [id])
+  teamId    String?
+
+  @@index([teamId])
+}
+
+// A strategic bet aligned to company needs. The top of the alignment chain.
+model Initiative {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  // Why this matters to the company — the alignment statement.
+  rationale   String?
+  // PLANNING | ACTIVE | ON_HOLD | COMPLETED | ARCHIVED
+  status      String   @default("ACTIVE")
+  // ON_TRACK | AT_RISK | OFF_TRACK — the owner's current health call.
+  health      String   @default("ON_TRACK")
+  owner       String?
+  // Display ordering on the portfolio board (lower = higher priority).
+  order       Int      @default(0)
+  startDate   DateTime @default(now())
+  targetDate  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  outcomes    Outcome[]
+  projects    Project[]
+  checkIns    CheckIn[]
+
+  @@index([status])
+}
+
+// A measurable success metric for an initiative (an OKR key result).
+// This is the shared "what does success look like" layer everyone can read.
+model Outcome {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  // NUMBER | PERCENT | CURRENCY | BOOLEAN
+  metricType  String   @default("NUMBER")
+  unit        String?  // e.g. "signups", "ms", "%", "$"
+  baseline    Float    @default(0)
+  current     Float    @default(0)
+  target      Float    @default(100)
+  // Higher current is better by default; set false for metrics like latency
+  // or churn where lower is better.
+  higherIsBetter Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  initiative  Initiative @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId String
+  // The team accountable for moving this metric.
+  team        Team?    @relation(fields: [teamId], references: [id])
+  teamId      String?
+
+  @@index([initiativeId])
+  @@index([teamId])
+}
+
+// A delivery vehicle that creates impact toward an initiative.
+model Project {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  // The impact this project is expected to create — the outcome-facing summary
+  // that rolls up to the initiative (no task detail required).
+  impact      String?
+  // PLANNING | ACTIVE | ON_HOLD | COMPLETED | ARCHIVED
+  status      String   @default("ACTIVE")
+  // ON_TRACK | AT_RISK | OFF_TRACK
+  health      String   @default("ON_TRACK")
+  lead        String?
+  startDate   DateTime @default(now())
+  targetDate  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  team        Team?       @relation(fields: [teamId], references: [id])
+  teamId      String?
+  initiative  Initiative? @relation(fields: [initiativeId], references: [id])
+  initiativeId String?
+
+  tasks       Task[]
+  milestones  Milestone[]
+  checkIns    CheckIn[]
+
+  @@index([status])
+  @@index([teamId])
+  @@index([initiativeId])
+}
+
+// Execution detail. Lives under a project and stays team-internal.
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  // TODO | IN_PROGRESS | BLOCKED | DONE
+  status      String    @default("TODO")
+  // LOW | MEDIUM | HIGH | URGENT
+  priority    String    @default("MEDIUM")
+  assignee    String?
+  // Relative effort in points (drives velocity / throughput insights).
+  effort      Int       @default(1)
+  dueDate     DateTime?
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  project     Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId   String
+
+  @@index([projectId])
+  @@index([status])
+}
+
+model Milestone {
+  id        String    @id @default(cuid())
+  name      String
+  // UPCOMING | COMPLETED | MISSED
+  status    String    @default("UPCOMING")
+  dueDate   DateTime
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  project   Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId String
+
+  @@index([projectId])
+}
+
+// A weekly status update. Attachable to a Project or an Initiative (or both via
+// the initiative rollup). Authored by the AI weekly run or a human.
+model CheckIn {
+  id               String   @id @default(cuid())
+  // The Monday of the week this check-in covers.
+  weekOf           DateTime
+  summary          String
+  highlights       String?  // newline-separated bullets
+  risks            String?  // newline-separated bullets
+  nextSteps        String?  // newline-separated bullets
+  // Health the check-in concluded with (ON_TRACK | AT_RISK | OFF_TRACK).
+  healthAssessment String   @default("ON_TRACK")
+  // Snapshot of the deterministic metrics at generation time (JSON string).
+  metricsJson      String?
+  source           String   @default("AI") // AI | MANUAL | FALLBACK
+
+  createdAt        DateTime @default(now())
+
+  project          Project?    @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId        String?
+  initiative       Initiative? @relation(fields: [initiativeId], references: [id], onDelete: Cascade)
+  initiativeId     String?
+
+  @@index([projectId])
+  @@index([initiativeId])
+  @@index([weekOf])
+}

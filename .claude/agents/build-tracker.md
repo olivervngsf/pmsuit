@@ -23,7 +23,8 @@ sections (keep these, in this order) are:
 2. **App Shell**
 3. **Engineer Built** (shipped features)
 4. **Design Debts** (product · design · strategy) — columns: `Debt | Type | Priority | Notes`
-5. **Others**
+5. **Research Debts** (validate with users before building) — columns: `Open question | What to clarify with users | Priority | Status`
+6. **Others**
 
 Most sections use columns `Item | Status | Notes`. The status legend is:
 `✅ Done · 🟡 In progress · ⬜ Planned / not started · ⚠️ Debt / needs attention`.
@@ -44,6 +45,8 @@ Keep every cell to ~one line so the tables stay scannable.
      (Engineer Built) or new infrastructure/app-shell work.
    - **Add or update Design Debts** when a change introduces a known gap, or
      resolve/soften a debt that was addressed (lower its priority or mark done).
+   - **Add a Research Debt** (its own section) when an open question needs user
+     validation before building; keep its priority `TBD` until answered.
    - Move items between sections only if clearly mis-filed.
    - Don't duplicate an existing row — update it instead.
 4. **Apply edits** with the Edit tool, preserving table formatting (header row +

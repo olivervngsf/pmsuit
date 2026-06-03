@@ -42,8 +42,8 @@ Three living notes are maintained **as part of every build**. All are markdown
 - **`docs/OUTCOMES_LOG.md`** — when a build delivers user-visible value, prepend
   a dated row (Date, Outcome, Impact, Status). Impact-level, not commit-level.
 - **`docs/BUILD_TRACKER.md`** — the state of the system by area (Foundation &
-  Infrastructure, App Shell, Engineer Built, Design Debts, Others). Update a
-  row's status as work lands, or add new rows / debts.
+  Infrastructure, App Shell, Engineer Built, Design Debts, Research Debts,
+  Others). Update a row's status as work lands, or add new rows / debts.
 
 Update these in the same change as the work they describe, so the repo always
 explains why it's built the way it is and what has shipped over time.

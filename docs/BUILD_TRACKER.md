@@ -67,6 +67,15 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Initiative ↔ project links are flat (no dependencies) | Strategy | Low | No cross-project sequencing |
 | No capacity / resourcing view across teams | Strategy | Low | People exist but aren't load-balanced |
 
+## Research Debts (validate with users before building)
+
+Open questions to clarify with real users. Priority stays **TBD** until we learn
+how the workflow actually works; promote once validated.
+
+| Open question | What to clarify with users | Priority | Status |
+|---------------|----------------------------|----------|--------|
+| When creating a project, should users assign it to an existing initiative **and/or create a new one inline**? | How does this fit their workflow — do PMs define initiatives first (top-down) then add projects, or spin up projects then group them (bottom-up)? Is inline initiative creation worth the added complexity, or is a simple "pick existing" enough? | TBD | 🔍 Open |
+
 ## Others
 
 | Item | Status | Notes |

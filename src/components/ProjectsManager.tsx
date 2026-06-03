@@ -8,6 +8,7 @@ import {
   Trash2,
   RotateCcw,
   LayoutGrid,
+  List,
   CalendarDays,
   Link2,
   AlertTriangle,
@@ -81,7 +82,7 @@ const emptyDraft = (): LocalProject => ({
   completionPct: 0,
 });
 
-type View = "grid" | "calendar";
+type View = "grid" | "list" | "calendar";
 
 export function ProjectsManager({
   seed,
@@ -107,7 +108,8 @@ export function ProjectsManager({
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    if (params.get("view") === "calendar") setView("calendar");
+    const v = params.get("view");
+    if (v === "calendar" || v === "list") setView(v);
     const t = params.get("team");
     if (t) setTeamFilter(t);
   }, []);
@@ -115,8 +117,8 @@ export function ProjectsManager({
   function changeView(next: View) {
     setView(next);
     const url = new URL(window.location.href);
-    if (next === "calendar") url.searchParams.set("view", "calendar");
-    else url.searchParams.delete("view");
+    if (next === "grid") url.searchParams.delete("view");
+    else url.searchParams.set("view", next);
     window.history.replaceState(null, "", url.toString());
   }
 
@@ -204,26 +206,25 @@ export function ProjectsManager({
         <div className="flex shrink-0 items-center gap-2">
           {/* View switcher — the choice is saved in the URL so it's shareable. */}
           <div className="flex rounded-lg border border-line bg-surface-overlay/40 p-0.5">
-            <button
-              onClick={() => changeView("grid")}
-              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs ${
-                view === "grid"
-                  ? "bg-brand/20 text-white"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <LayoutGrid className="h-3.5 w-3.5" /> Grid
-            </button>
-            <button
-              onClick={() => changeView("calendar")}
-              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs ${
-                view === "calendar"
-                  ? "bg-brand/20 text-white"
-                  : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              <CalendarDays className="h-3.5 w-3.5" /> Calendar
-            </button>
+            {(
+              [
+                { key: "grid", label: "Cards", Icon: LayoutGrid },
+                { key: "list", label: "List", Icon: List },
+                { key: "calendar", label: "Calendar", Icon: CalendarDays },
+              ] as const
+            ).map(({ key, label, Icon }) => (
+              <button
+                key={key}
+                onClick={() => changeView(key)}
+                className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs ${
+                  view === key
+                    ? "bg-brand/20 text-white"
+                    : "text-slate-400 hover:text-slate-200"
+                }`}
+              >
+                <Icon className="h-3.5 w-3.5" /> {label}
+              </button>
+            ))}
           </div>
           <button onClick={startNew} className="btn btn-primary">
             <Plus className="h-4 w-4" /> New project
@@ -315,6 +316,81 @@ export function ProjectsManager({
           onYearChange={setYear}
           onEdit={startEdit}
         />
+      )}
+
+      {view === "list" && (
+        <div className="card divide-y divide-line">
+          {filtered.map((p) => (
+            <div
+              key={p.id}
+              className="group flex flex-wrap items-center gap-3 px-4 py-3"
+            >
+              <div className="flex min-w-0 flex-1 items-center gap-2">
+                <KeyTag id={p.key} />
+                {isLocal(p.id) ? (
+                  <button
+                    onClick={() => startEdit(p)}
+                    className="truncate text-left text-sm font-medium text-white hover:text-brand-soft"
+                  >
+                    {p.name || "Untitled project"}
+                  </button>
+                ) : (
+                  <Link
+                    href={`/projects/${p.id}`}
+                    className="truncate text-sm font-medium text-white hover:text-brand-soft"
+                  >
+                    {p.name}
+                  </Link>
+                )}
+                {p.initiativeName ? (
+                  <span className="hidden truncate text-xs text-slate-500 lg:inline">
+                    ◆ {p.initiativeName}
+                  </span>
+                ) : (
+                  <span className="chip border border-amber-500/30 bg-amber-500/10 text-amber-300">
+                    <AlertTriangle className="h-3 w-3" /> Unaligned
+                  </span>
+                )}
+              </div>
+              <div className="flex shrink-0 items-center gap-2.5">
+                {p.teamSlug && p.teamName && p.teamColor && (
+                  <TeamChip
+                    team={{ slug: p.teamSlug, name: p.teamName, color: p.teamColor }}
+                  />
+                )}
+                <Deadline date={p.targetDate} done={p.status === "COMPLETED"} />
+                <span className="hidden w-20 sm:block">
+                  <ProgressBar
+                    pct={p.completionPct}
+                    color={p.teamColor ?? undefined}
+                  />
+                </span>
+                <span className="hidden w-9 text-right text-xs tabular-nums text-slate-400 sm:block">
+                  {p.completionPct}%
+                </span>
+                <HealthBadge health={p.health as Health} />
+                <span className="flex gap-1 opacity-0 transition group-hover:opacity-100">
+                  <button
+                    onClick={() => startEdit(p)}
+                    title="Edit"
+                    className="rounded-md p-1.5 text-slate-400 hover:bg-surface-overlay hover:text-white"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Delete "${p.name}"?`)) remove(p.id);
+                    }}
+                    title="Delete"
+                    className="rounded-md p-1.5 text-slate-400 hover:bg-rose-500/15 hover:text-rose-300"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </button>
+                </span>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {view === "grid" && (

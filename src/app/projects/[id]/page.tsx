@@ -16,6 +16,7 @@ import {
 } from "@/components/ui";
 import { TaskBoard } from "@/components/TaskBoard";
 import { Ownership } from "@/components/Ownership";
+import { ProjectAlignment } from "@/components/ProjectAlignment";
 import { RunCheckIn } from "@/components/RunCheckIn";
 import { CheckInCard } from "@/components/CheckInCard";
 import { fmtShortDate, relativeDays } from "@/lib/format";
@@ -70,14 +71,8 @@ export default async function ProjectPage({
             <h1 className="text-2xl font-semibold text-white">{project.name}</h1>
             <HealthBadge health={project.health} />
           </div>
-          {project.impact && (
-            <p className="mt-2 text-sm text-slate-300">
-              <span className="text-slate-500">Impact: </span>
-              {project.impact}
-            </p>
-          )}
           {project.description && (
-            <p className="mt-1.5 text-sm text-slate-400">{project.description}</p>
+            <p className="mt-2 text-sm text-slate-400">{project.description}</p>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
             <Deadline
@@ -167,6 +162,14 @@ export default async function ProjectPage({
           </div>
         )}
       </div>
+
+      <section className="mt-8">
+        <SectionTitle>Alignment &amp; impact</SectionTitle>
+        <ProjectAlignment
+          alignment={project.alignment}
+          impact={project.impact}
+        />
+      </section>
 
       <section className="mt-8">
         <SectionTitle>Ownership &amp; accountability</SectionTitle>

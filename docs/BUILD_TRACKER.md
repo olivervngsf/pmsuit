@@ -51,6 +51,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Deadline visibility (date + countdown, urgency color) | ✅ | `Deadline` badge on cards & project detail |
 | Schedule vs progress (time elapsed vs work done) | ✅ | `scheduleStatus`; flags behind / past deadline |
 | Alignment surfaced + "Unaligned" flag (no initiative) | ✅ | `AlignmentChip` on cards & detail |
+| Project "Alignment & impact" panel | ✅ | Initiative + why + impact + the success metrics it contributes to |
 | Demo seed (fake company / teams / people / work) | ✅ | `prisma/seed.ts` |
 
 ## Design Debts (product · design · strategy)

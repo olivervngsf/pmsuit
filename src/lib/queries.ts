@@ -237,6 +237,13 @@ export async function getProject(id: string, now = new Date()) {
     where: { id },
     include: {
       ...projectInclude,
+      // Richer initiative (overrides projectInclude's id/name-only select) so we
+      // can show what this project is contributing toward.
+      initiative: {
+        include: {
+          outcomes: { include: { team: true }, orderBy: { createdAt: "asc" } },
+        },
+      },
       owner: { include: { team: true } },
       contributors: {
         include: { team: true, pointPerson: true },
@@ -246,6 +253,22 @@ export async function getProject(id: string, now = new Date()) {
   });
   if (!project) return null;
   const rollup = toProjectRollup(project, now);
+
+  // The alignment story: which initiative this project drives, why it matters,
+  // and the success metrics it ladders up to.
+  const init = project.initiative as any;
+  const alignment = init
+    ? {
+        id: init.id,
+        key: init.key ?? null,
+        name: init.name,
+        rationale: init.rationale as string | null,
+        description: init.description as string | null,
+        health: init.health as Health,
+        outcomesProgress: avgOutcomeProgress(init.outcomes ?? []),
+        outcomes: (init.outcomes ?? []).map(toOutcomeView),
+      }
+    : null;
 
   // Order contributors by RACI weight so the accountable owner reads first.
   const RACI_ORDER: Record<string, number> = {
@@ -295,6 +318,7 @@ export async function getProject(id: string, now = new Date()) {
         }
       : null,
     contributors,
+    alignment,
     tasks: project.tasks,
     milestones: project.milestones.sort(
       (a, b) => a.dueDate.getTime() - b.dueDate.getTime(),

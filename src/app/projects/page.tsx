@@ -1,8 +1,12 @@
-import { getProjects, getTeams } from "@/lib/queries";
+import { getProjects, getTeams, getInitiatives } from "@/lib/queries";
 import { ProjectsManager, type LocalProject } from "@/components/ProjectsManager";
 
 export default async function ProjectsPage() {
-  const [projects, teams] = await Promise.all([getProjects(), getTeams()]);
+  const [projects, teams, initiatives] = await Promise.all([
+    getProjects(),
+    getTeams(),
+    getInitiatives(),
+  ]);
 
   // Map the rich server rollups down to the serializable shape the client
   // CRUD manager works with (it overlays localStorage edits on top of this).
@@ -17,6 +21,7 @@ export default async function ProjectsPage() {
     teamName: p.team?.name ?? null,
     teamColor: p.team?.color ?? null,
     owner: p.lead ?? null,
+    initiativeId: p.initiative?.id ?? null,
     initiativeName: p.initiative?.name ?? null,
     startDate: p.startDate.toISOString(),
     targetDate: p.targetDate ? p.targetDate.toISOString() : null,
@@ -33,5 +38,19 @@ export default async function ProjectsPage() {
     color: t.color,
   }));
 
-  return <ProjectsManager seed={seed} teams={teamOpts} />;
+  // Initiatives + their success metrics, so the form can show what a project
+  // contributes to when one is selected.
+  const initiativeOpts = initiatives.map((i) => ({
+    id: i.id,
+    name: i.name,
+    outcomes: i.outcomes.map((o) => ({ id: o.id, name: o.name })),
+  }));
+
+  return (
+    <ProjectsManager
+      seed={seed}
+      teams={teamOpts}
+      initiatives={initiativeOpts}
+    />
+  );
 }

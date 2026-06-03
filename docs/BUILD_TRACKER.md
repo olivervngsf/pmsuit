@@ -45,6 +45,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
+| Connect a project to an initiative in the form (+ shows its success metrics) | ✅ | Initiative picker in create/edit; "pick existing" |
 | Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
 | Projects views: Cards / List / Calendar (shareable via URL) | ✅ | `?view=list`/`calendar`; calendar groups by month Q1–Q4 |
 | Team filter on Projects (saved in URL, shareable) | ✅ | `?team=…`; applies to grid + calendar + stats |
@@ -79,7 +80,7 @@ how the workflow actually works; promote once validated.
 
 | Open question | What to clarify with users | Priority | Status |
 |---------------|----------------------------|----------|--------|
-| When creating a project, should users assign it to an existing initiative **and/or create a new one inline**? | How does this fit their workflow — do PMs define initiatives first (top-down) then add projects, or spin up projects then group them (bottom-up)? Is inline initiative creation worth the added complexity, or is a simple "pick existing" enough? | TBD | 🔍 Open |
+| Creating a project: is **inline "+ New initiative"** creation needed, or is picking an existing one enough? | "Pick existing" now shipped in the form (+ shows the initiative's success metrics). Still open: do PMs need to spin up a new initiative at project-create time (bottom-up), or do they always define initiatives first (top-down)? | TBD | 🟡 Partial — pick-existing done |
 | How do users want to see analysis/metrics — scoped to **their own team**, or **org-wide / general**? | Who's the audience (an IC PM vs a head of product/exec)? Which metrics matter (workload counts, health, velocity, deadlines)? Is "this week/month/year" even the right cut, or do they think in quarters/initiatives? Pulled the team week/month/year tiles pending this. | TBD | 🔍 Open |
 | How do users want to **see projects, and why**? | What grouping/view drives their decisions — by team, initiative, deadline, owner, or status? What question are they answering when they open the list (what's late? what's mine? what's at risk?)? | TBD | 🔍 Open |
 

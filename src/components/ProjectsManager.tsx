@@ -38,6 +38,7 @@ export type LocalProject = {
   teamName: string | null;
   teamColor: string | null;
   owner: string | null;
+  initiativeId: string | null;
   initiativeName: string | null;
   // ISO date strings — drive the calendar/roadmap view.
   startDate: string;
@@ -51,6 +52,11 @@ export type LocalProject = {
 };
 
 type TeamOpt = { slug: string; name: string; color: string };
+type InitiativeOpt = {
+  id: string;
+  name: string;
+  outcomes: { id: string; name: string }[];
+};
 
 const STATUSES: LifecycleStatus[] = [
   "PLANNING",
@@ -72,6 +78,7 @@ const emptyDraft = (): LocalProject => ({
   teamName: null,
   teamColor: null,
   owner: "",
+  initiativeId: null,
   initiativeName: null,
   startDate: new Date().toISOString(),
   targetDate: null,
@@ -87,9 +94,11 @@ type View = "grid" | "list" | "calendar";
 export function ProjectsManager({
   seed,
   teams,
+  initiatives,
 }: {
   seed: LocalProject[];
   teams: TeamOpt[];
+  initiatives: InitiativeOpt[];
 }) {
   const { items, add, update, remove, reset, hydrated } = useLocalStore<LocalProject>(
     "pmsuit:projects",
@@ -180,6 +189,17 @@ export function ProjectsManager({
       teamColor: t?.color ?? null,
     }));
   }
+
+  function applyInitiative(id: string) {
+    const i = initiatives.find((x) => x.id === id) ?? null;
+    setDraft((d) => ({
+      ...d,
+      initiativeId: i?.id ?? null,
+      initiativeName: i?.name ?? null,
+    }));
+  }
+
+  const selectedInitiative = initiatives.find((i) => i.id === draft.initiativeId);
 
   function save() {
     if (!draft.name.trim()) return;
@@ -565,6 +585,38 @@ export function ProjectsManager({
             onChange={(e) => setDraft({ ...draft, impact: e.target.value })}
           />
         </Field>
+
+        {/* Strategic alignment: connect the project to an initiative and see
+            the success metrics it will contribute to. */}
+        <Field label="Initiative (what this project drives)">
+          <Select
+            value={draft.initiativeId ?? ""}
+            onChange={(e) => applyInitiative(e.target.value)}
+          >
+            <option value="">— none (unaligned) —</option>
+            {initiatives.map((i) => (
+              <option key={i.id} value={i.id}>
+                {i.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
+        {selectedInitiative && selectedInitiative.outcomes.length > 0 && (
+          <div className="rounded-lg border border-brand/20 bg-brand/5 p-3">
+            <div className="label mb-1 text-brand-soft">
+              Success metrics it contributes to
+            </div>
+            <ul className="space-y-0.5">
+              {selectedInitiative.outcomes.map((o) => (
+                <li key={o.id} className="flex gap-2 text-xs text-slate-300">
+                  <span className="text-brand-soft">•</span>
+                  {o.name}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+
         <div className="grid grid-cols-2 gap-3">
           <Field label="Team">
             <Select

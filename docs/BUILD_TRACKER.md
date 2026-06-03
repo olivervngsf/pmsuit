@@ -40,7 +40,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Deterministic insights engine (velocity, overdue/stale/blocked, health drift) | ✅ | `src/lib/insights.ts` (pure functions) |
 | Portfolio dashboard | ✅ | `/` — outcomes everyone can see |
 | Initiatives: list + detail (success metrics, projects, teams) | ✅ | `/initiatives` |
-| Projects: list + detail + task board | ✅ | `/projects` — click-to-advance board |
+| Projects: list + detail + task board | ✅ | `/projects` — drag-and-drop kanban (HTML5 DnD) |
 | Teams: list + detail (people, owned outcomes) | ✅ | `/teams` |
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |

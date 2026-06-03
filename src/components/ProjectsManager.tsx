@@ -11,6 +11,7 @@ import {
   CalendarDays,
   Link2,
   AlertTriangle,
+  X,
 } from "lucide-react";
 import { useLocalStore, localId } from "@/lib/useLocalStore";
 import { Modal, Field, TextInput, TextArea, Select } from "./Modal";
@@ -276,6 +277,27 @@ export function ProjectsManager({
                 style={{ backgroundColor: t.color }}
               />
               {t.name}
+              {active && (
+                <span
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Remove ${t.name} filter`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    changeTeam("all");
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      changeTeam("all");
+                    }
+                  }}
+                  className="-mr-1 ml-0.5 flex h-4 w-4 items-center justify-center rounded-full transition hover:bg-black/25"
+                >
+                  <X className="h-3 w-3" />
+                </span>
+              )}
             </button>
           );
         })}

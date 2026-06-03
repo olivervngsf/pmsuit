@@ -45,6 +45,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
+| Client-side CRUD — tasks (add/edit/delete on the board) | ✅ | Per-project localStorage; new tasks get next `TASK-n` |
 | Connect a project to an initiative in the form (+ shows its success metrics) | ✅ | Initiative picker in create/edit; "pick existing" |
 | Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
 | Projects views: Cards / List / Calendar (shareable via URL) | ✅ | `?view=list`/`calendar`; calendar groups by month Q1–Q4 |
@@ -60,12 +61,11 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Debt | Type | Priority | Notes |
 |------|------|----------|-------|
 | Project form has no start date and no duration; show days between start & end | Design | Med | When a user sets start (from) and end dates, show "N days" so they know how long the project runs |
-| Create/edit/delete UI — projects done; tasks, initiatives, outcomes pending | Product | Med | Projects shipped (client-side localStorage); extend to other entities next |
+| Create/edit/delete UI — projects + tasks done; initiatives, outcomes pending | Product | Med | Projects & tasks shipped (client-side localStorage); extend to initiatives/outcomes next |
 | No real-data integration (still dummy) | Product | High | Swap at `queries.ts` / `seed.ts` |
 | No auth, multi-tenant, or permissions | Product | High | Single shared view today |
 | AI check-ins not persisted in the static build | Product | Med | Static demo shows a sample only |
 | Task drag-and-drop is mouse-only (no touch) | Design | Low | Native HTML5 DnD; swap to a pointer-based lib for touch |
-| No way to create / edit / delete a task in the UI | Product | Med | Board only drags status; tasks come from the seed — task CRUD pending |
 | Outcome metric values updated manually | Product | Med | No metric integrations |
 | Mobile / responsive navigation incomplete | Design | Med | Sidebar hidden on small screens |
 | No trends/charts over time (point-in-time only) | Design | Med | Velocity is 7d vs prior 7d only |

@@ -178,7 +178,7 @@ export default async function ProjectPage({
 
       <section className="mt-8">
         <SectionTitle>Tasks</SectionTitle>
-        <TaskBoard tasks={project.tasks} />
+        <TaskBoard tasks={project.tasks} projectId={project.id} />
       </section>
 
       <div className="mt-8 grid gap-8 lg:grid-cols-3">

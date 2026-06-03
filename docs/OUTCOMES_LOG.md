@@ -10,6 +10,7 @@ for the standing convention.
 
 | Date | Outcome | Impact | Status |
 |------|---------|--------|--------|
+| 2026-06-03 | Create / edit / delete tasks on the board | Each column has "+ Add task"; cards have edit & delete; tasks persist per project (localStorage) and get a TASK-n id | Shipped |
 | 2026-06-03 | Drag-and-drop task board | Tasks on the project detail can be dragged between columns (To do / In progress / Blocked / Done) with drop-target highlighting | Shipped |
 | 2026-06-03 | Connect projects to initiatives in the form | Create/edit project now has an Initiative picker; selecting one shows the success metrics the project will contribute to | Shipped |
 | 2026-06-03 | Clear project alignment & impact panel | Project pages now show what the project is focused on — the initiative, why it matters, the project's specific impact, and the initiative's success metrics it contributes to | Shipped |

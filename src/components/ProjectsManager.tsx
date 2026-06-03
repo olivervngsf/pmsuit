@@ -82,13 +82,17 @@ export function ProjectsManager({
   const [draft, setDraft] = useState<LocalProject>(emptyDraft());
   const [formOpen, setFormOpen] = useState(false);
 
-  // Current view is encoded in the URL (?view=calendar) so it can be shared.
+  // View and team filter are encoded in the URL (?view=…&team=…) so the link
+  // remembers them — save or share the URL and the filter comes back.
   const [view, setView] = useState<View>("grid");
   const [year, setYear] = useState<number>(new Date().getFullYear());
+  const [teamFilter, setTeamFilter] = useState<string>("all");
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get("view") === "calendar") setView("calendar");
+    const t = params.get("team");
+    if (t) setTeamFilter(t);
   }, []);
 
   function changeView(next: View) {
@@ -96,6 +100,14 @@ export function ProjectsManager({
     const url = new URL(window.location.href);
     if (next === "calendar") url.searchParams.set("view", "calendar");
     else url.searchParams.delete("view");
+    window.history.replaceState(null, "", url.toString());
+  }
+
+  function changeTeam(slug: string) {
+    setTeamFilter(slug);
+    const url = new URL(window.location.href);
+    if (slug === "all") url.searchParams.delete("team");
+    else url.searchParams.set("team", slug);
     window.history.replaceState(null, "", url.toString());
   }
 
@@ -109,12 +121,20 @@ export function ProjectsManager({
     return `PRJ-${max + 1}`;
   }
 
+  const filtered = useMemo(
+    () =>
+      teamFilter === "all"
+        ? items
+        : items.filter((p) => p.teamSlug === teamFilter),
+    [items, teamFilter],
+  );
+
   const stats = useMemo(() => {
-    const active = items.filter((p) => p.status === "ACTIVE").length;
-    const atRisk = items.filter((p) => p.health !== "ON_TRACK").length;
-    const blocked = items.reduce((a, p) => a + (p.blocked || 0), 0);
-    return { total: items.length, active, atRisk, blocked };
-  }, [items]);
+    const active = filtered.filter((p) => p.status === "ACTIVE").length;
+    const atRisk = filtered.filter((p) => p.health !== "ON_TRACK").length;
+    const blocked = filtered.reduce((a, p) => a + (p.blocked || 0), 0);
+    return { total: filtered.length, active, atRisk, blocked };
+  }, [filtered]);
 
   function closeForm() {
     setDraft(emptyDraft());
@@ -209,9 +229,50 @@ export function ProjectsManager({
         />
       </div>
 
+      {/* Team filter — saved in the URL (?team=…) so the link remembers it. */}
+      <div className="mb-5 flex flex-wrap items-center gap-2">
+        <span className="mr-1 text-xs font-medium text-slate-500">Team</span>
+        <button
+          onClick={() => changeTeam("all")}
+          className={`chip border transition ${
+            teamFilter === "all"
+              ? "border-brand/50 bg-brand/15 text-white"
+              : "border-line bg-surface-overlay/40 text-slate-400 hover:text-slate-200"
+          }`}
+        >
+          All
+        </button>
+        {teams.map((t) => {
+          const active = teamFilter === t.slug;
+          return (
+            <button
+              key={t.slug}
+              onClick={() => changeTeam(t.slug)}
+              className="chip border transition"
+              style={{
+                color: active ? "#fff" : t.color,
+                borderColor: active ? t.color : `${t.color}55`,
+                backgroundColor: active ? `${t.color}33` : `${t.color}14`,
+              }}
+            >
+              <span
+                className="h-1.5 w-1.5 rounded-full"
+                style={{ backgroundColor: t.color }}
+              />
+              {t.name}
+            </button>
+          );
+        })}
+        {teamFilter !== "all" && (
+          <span className="text-xs text-slate-500">
+            · {filtered.length} of {items.length}
+          </span>
+        )}
+      </div>
+
       {view === "calendar" && (
         <RoadmapCalendar
-          projects={items}
+          projects={filtered}
           year={year}
           onYearChange={setYear}
           onEdit={startEdit}
@@ -220,7 +281,7 @@ export function ProjectsManager({
 
       {view === "grid" && (
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
-        {items.map((p) => (
+        {filtered.map((p) => (
           <div
             key={p.id}
             className="card group relative p-4 transition hover:border-brand/40"
@@ -302,10 +363,24 @@ export function ProjectsManager({
       </div>
       )}
 
-      {hydrated && items.length === 0 && (
+      {hydrated && filtered.length === 0 && (
         <div className="card p-10 text-center text-sm text-slate-500">
-          No projects. Click <span className="text-brand-soft">New project</span>{" "}
-          to add one.
+          {teamFilter === "all" ? (
+            <>
+              No projects. Click{" "}
+              <span className="text-brand-soft">New project</span> to add one.
+            </>
+          ) : (
+            <>
+              No projects for this team.{" "}
+              <button
+                onClick={() => changeTeam("all")}
+                className="text-brand-soft hover:underline"
+              >
+                Clear filter
+              </button>
+            </>
+          )}
         </div>
       )}
 

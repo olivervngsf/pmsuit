@@ -47,6 +47,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
 | Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
 | Roadmap calendar view (projects by month, Q1–Q4) + shareable view switcher | ✅ | `?view=calendar` in URL; Grid/Calendar toggle |
+| Team filter on Projects (saved in URL, shareable) | ✅ | `?team=…`; applies to grid + calendar + stats |
 | Demo seed (fake company / teams / people / work) | ✅ | `prisma/seed.ts` |
 
 ## Design Debts (product · design · strategy)

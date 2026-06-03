@@ -74,6 +74,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Security: Next pinned to patched 15.5.19 (CVE-2025-66478) | ✅ | |
 | Automated tests (unit / e2e) | ⬜ | `insights.ts` is pure & ready to test |
 | CI pipeline | ⬜ | None yet |
+| Build-tracker maintainer agent | ✅ | `.claude/agents/build-tracker.md` keeps this file current |
 | Git commits show "Unverified" on GitHub | ⚠️ | Needs history rewrite + force-push |
 | Empty `main` branch cleanup | ⚠️ | Leftover from PR setup |
 | PR into `main` | 🟡 | Blocked on force-push authorization |

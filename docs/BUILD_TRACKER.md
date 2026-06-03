@@ -42,6 +42,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Initiatives: list + detail (success metrics, projects, teams) | ✅ | `/initiatives` |
 | Projects: list + detail + task board | ✅ | `/projects` — click-to-advance board |
 | Teams: list + detail (people, owned outcomes) | ✅ | `/teams` |
+| Team workload metric — projects worked on this week / month / year | ✅ | `activeProjectCounts`; on team list + detail |
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |

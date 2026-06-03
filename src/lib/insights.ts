@@ -276,6 +276,56 @@ export function velocityTrend(
   return "flat";
 }
 
+// --- Time-windowed "projects worked on" counts (week / month / year) --------
+
+type DatedProject = {
+  startDate: Date;
+  targetDate: Date | null;
+  status: string;
+};
+
+function weekBounds(now: Date): [Date, Date] {
+  const start = startOfWeek(now);
+  const end = new Date(start);
+  end.setDate(end.getDate() + 6);
+  end.setHours(23, 59, 59, 999);
+  return [start, end];
+}
+function monthBounds(now: Date): [Date, Date] {
+  const start = new Date(now.getFullYear(), now.getMonth(), 1);
+  const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+  return [start, end];
+}
+function yearBounds(now: Date): [Date, Date] {
+  return [
+    new Date(now.getFullYear(), 0, 1),
+    new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999),
+  ];
+}
+
+/**
+ * How many projects a team is working on within the current week, month, and
+ * year. A project counts if its [start, target] span overlaps the period and it
+ * isn't archived.
+ */
+export function activeProjectCounts(
+  projects: DatedProject[],
+  now = new Date(),
+): { week: number; month: number; year: number } {
+  const overlaps = (p: DatedProject, [s, e]: [Date, Date]) => {
+    const start = p.startDate;
+    const end = p.targetDate ?? p.startDate;
+    return start <= e && end >= s;
+  };
+  const count = (b: [Date, Date]) =>
+    projects.filter((p) => p.status !== "ARCHIVED" && overlaps(p, b)).length;
+  return {
+    week: count(weekBounds(now)),
+    month: count(monthBounds(now)),
+    year: count(yearBounds(now)),
+  };
+}
+
 export type ScheduleStatus = {
   /** 0..100 of the start→target window that has elapsed. */
   elapsedPct: number;

@@ -10,6 +10,7 @@ for the standing convention.
 
 | Date | Outcome | Impact | Status |
 |------|---------|--------|--------|
+| 2026-06-03 | Team workload by time window | Teams list + detail now show how many projects each team is working on this week, month, and year | Shipped |
 | 2026-06-03 | Clear project alignment & impact panel | Project pages now show what the project is focused on — the initiative, why it matters, the project's specific impact, and the initiative's success metrics it contributes to | Shipped |
 | 2026-06-03 | Deadlines & alignment made visible | Every project shows its deadline + countdown and a time-elapsed-vs-work-done schedule check; projects with no initiative are flagged "Unaligned" | Shipped |
 | 2026-06-03 | Team filter on Projects (shareable) | Filter projects by team from the top of the page; the filter is saved in the URL so the link remembers it | Shipped |

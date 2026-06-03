@@ -54,6 +54,24 @@ export default async function TeamsPage() {
               </span>
             </div>
 
+            {/* Projects this team is working on, by time window. */}
+            <div className="mt-3 grid grid-cols-3 gap-2 rounded-lg border border-line bg-surface-overlay/30 p-2 text-center">
+              {[
+                { label: "Week", value: team.active.week },
+                { label: "Month", value: team.active.month },
+                { label: "Year", value: team.active.year },
+              ].map((s) => (
+                <div key={s.label}>
+                  <div className="text-lg font-semibold text-white">
+                    {s.value}
+                  </div>
+                  <div className="text-[10px] uppercase tracking-wide text-slate-500">
+                    {s.label}
+                  </div>
+                </div>
+              ))}
+            </div>
+
             <div className="mt-4 flex -space-x-2">
               {team.members.slice(0, 6).map((mem) => (
                 <span

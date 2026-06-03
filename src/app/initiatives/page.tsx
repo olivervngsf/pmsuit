@@ -3,7 +3,6 @@ import { getInitiatives } from "@/lib/queries";
 import { HealthBadge, ProgressBar, TeamChip } from "@/components/ui";
 import { OutcomeRow } from "@/components/Outcome";
 
-export const dynamic = "force-dynamic";
 
 export default async function InitiativesPage() {
   const initiatives = await getInitiatives();

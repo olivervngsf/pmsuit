@@ -10,7 +10,6 @@ import { CheckInCard } from "@/components/CheckInCard";
 import { HealthBadge, StatCard, SectionTitle } from "@/components/ui";
 import { fmtDate } from "@/lib/format";
 
-export const dynamic = "force-dynamic";
 
 export default async function InsightsPage() {
   const initiatives = await getInitiatives();

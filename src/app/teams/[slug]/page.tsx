@@ -1,12 +1,17 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
 import { getTeamBySlug } from "@/lib/queries";
 import { ProjectCard } from "@/components/ProjectCard";
 import { OutcomeRow } from "@/components/Outcome";
 import { StatCard, SectionTitle } from "@/components/ui";
 import { initials } from "@/lib/format";
 
-export const dynamic = "force-dynamic";
+// Pre-render every team page at build time (static export).
+export async function generateStaticParams() {
+  const teams = await prisma.team.findMany({ select: { slug: true } });
+  return teams.map((t) => ({ slug: t.slug }));
+}
 
 export default async function TeamPage({
   params,

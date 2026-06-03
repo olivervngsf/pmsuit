@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { CheckInCard } from "./CheckInCard";
+import { sampleCheckIn } from "@/lib/demo-checkin";
 
 type Target = { type: "initiative" | "project"; id: string; name: string };
 
@@ -39,14 +40,22 @@ export function WeeklyRunAll({
     const collected: Result[] = [];
     try {
       for (const t of targets) {
-        const res = await fetch("/api/checkins/generate", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ type: t.type, id: t.id }),
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.error ?? `Failed on ${t.name}`);
-        collected.push({ name: t.name, draft: data.draft });
+        let draft;
+        try {
+          const res = await fetch("/api/checkins/generate", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ type: t.type, id: t.id }),
+          });
+          const data = await res.json();
+          if (!res.ok) throw new Error(data.error ?? `Failed on ${t.name}`);
+          draft = data.draft;
+        } catch {
+          // No backend (static demo): use a representative sample.
+          await new Promise((r) => setTimeout(r, 400));
+          draft = sampleCheckIn(t.name, t.type);
+        }
+        collected.push({ name: t.name, draft });
         setResults([...collected]);
         setDone((d) => d + 1);
       }

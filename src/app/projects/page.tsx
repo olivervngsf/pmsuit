@@ -2,7 +2,6 @@ import { getProjects } from "@/lib/queries";
 import { ProjectCard } from "@/components/ProjectCard";
 import { StatCard } from "@/components/ui";
 
-export const dynamic = "force-dynamic";
 
 export default async function ProjectsPage() {
   const projects = await getProjects();

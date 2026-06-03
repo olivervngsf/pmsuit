@@ -2,7 +2,6 @@ import Link from "next/link";
 import { getTeams } from "@/lib/queries";
 import { initials } from "@/lib/format";
 
-export const dynamic = "force-dynamic";
 
 export default async function TeamsPage() {
   const teams = await getTeams();

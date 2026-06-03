@@ -15,7 +15,11 @@ import { RunCheckIn } from "@/components/RunCheckIn";
 import { CheckInCard } from "@/components/CheckInCard";
 import { fmtDate } from "@/lib/format";
 
-export const dynamic = "force-dynamic";
+// Pre-render every initiative page at build time (static export).
+export async function generateStaticParams() {
+  const initiatives = await prisma.initiative.findMany({ select: { id: true } });
+  return initiatives.map((i) => ({ id: i.id }));
+}
 
 export default async function InitiativePage({
   params,
@@ -63,7 +67,13 @@ export default async function InitiativePage({
             ))}
           </div>
         </div>
-        <RunCheckIn type="initiative" id={init.id} label="Run check-in" compact />
+        <RunCheckIn
+          type="initiative"
+          id={init.id}
+          name={init.name}
+          label="Run check-in"
+          compact
+        />
       </header>
 
       {drift && (

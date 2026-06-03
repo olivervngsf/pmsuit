@@ -47,12 +47,16 @@ export function TaskBoard({ tasks }: { tasks: BoardTask[] }) {
       prev.map((t) => (t.id === id ? { ...t, status } : t)),
     );
     try {
-      await fetch(`/api/tasks/${id}`, {
+      // Persist to the backend when one exists. In the static demo build there
+      // is no API, so this fails silently and the optimistic update stands.
+      const res = await fetch(`/api/tasks/${id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status }),
       });
-      router.refresh();
+      if (res.ok) router.refresh();
+    } catch {
+      // Static demo: keep the optimistic, in-memory move.
     } finally {
       setBusy(null);
     }

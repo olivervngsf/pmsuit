@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { prisma } from "@/lib/db";
 import { getProject } from "@/lib/queries";
 import { velocityTrend } from "@/lib/insights";
 import {
@@ -15,7 +16,11 @@ import { RunCheckIn } from "@/components/RunCheckIn";
 import { CheckInCard } from "@/components/CheckInCard";
 import { fmtDate, fmtShortDate, relativeDays } from "@/lib/format";
 
-export const dynamic = "force-dynamic";
+// Pre-render every project page at build time (static export).
+export async function generateStaticParams() {
+  const projects = await prisma.project.findMany({ select: { id: true } });
+  return projects.map((p) => ({ id: p.id }));
+}
 
 export default async function ProjectPage({
   params,
@@ -74,7 +79,13 @@ export default async function ProjectPage({
             )}
           </div>
         </div>
-        <RunCheckIn type="project" id={project.id} label="Run check-in" compact />
+        <RunCheckIn
+          type="project"
+          id={project.id}
+          name={project.name}
+          label="Run check-in"
+          compact
+        />
       </header>
 
       {drift && (

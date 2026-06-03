@@ -2,10 +2,26 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, RotateCcw, LayoutGrid, CalendarDays } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  RotateCcw,
+  LayoutGrid,
+  CalendarDays,
+  Link2,
+  AlertTriangle,
+} from "lucide-react";
 import { useLocalStore, localId } from "@/lib/useLocalStore";
 import { Modal, Field, TextInput, TextArea, Select } from "./Modal";
-import { HealthBadge, ProgressBar, StatCard, TeamChip, KeyTag } from "./ui";
+import {
+  HealthBadge,
+  ProgressBar,
+  StatCard,
+  TeamChip,
+  KeyTag,
+  Deadline,
+} from "./ui";
 import { RoadmapCalendar } from "./RoadmapCalendar";
 import { STATUS_LABEL, type Health, type LifecycleStatus } from "@/lib/types";
 
@@ -325,10 +341,31 @@ export function ProjectsManager({
                   {p.name}
                 </Link>
               )}
-              {p.initiativeName && (
-                <div className="mt-0.5 truncate text-xs text-slate-500">
-                  ◆ {p.initiativeName}
-                </div>
+            </div>
+
+            {/* Commitment + alignment, visible up front. */}
+            <div className="mt-2 flex flex-wrap items-center gap-1.5">
+              <Deadline
+                date={p.targetDate}
+                done={p.status === "COMPLETED"}
+              />
+              {p.initiativeName ? (
+                <span
+                  className="chip border border-brand/30 bg-brand/10 text-brand-soft"
+                  title={`Aligned to: ${p.initiativeName}`}
+                >
+                  <Link2 className="h-3 w-3" />
+                  <span className="max-w-[10rem] truncate">
+                    {p.initiativeName}
+                  </span>
+                </span>
+              ) : (
+                <span
+                  className="chip border border-amber-500/30 bg-amber-500/10 text-amber-300"
+                  title="Not linked to any initiative — is this project meaningful?"
+                >
+                  <AlertTriangle className="h-3 w-3" /> Unaligned
+                </span>
               )}
             </div>
 

@@ -275,3 +275,39 @@ export function velocityTrend(
   if (m.velocityLast7 < m.velocityPrev7) return "down";
   return "flat";
 }
+
+export type ScheduleStatus = {
+  /** 0..100 of the start→target window that has elapsed. */
+  elapsedPct: number;
+  /** Work done is meaningfully behind time elapsed. */
+  behind: boolean;
+  label: "On schedule" | "Behind schedule" | "Past deadline";
+};
+
+/**
+ * Compares time spent against work completed so the UI can show whether a
+ * commitment is on track for its deadline. "Behind" if completion trails the
+ * elapsed share of the timeline by more than 10 points.
+ */
+export function scheduleStatus(
+  start: Date,
+  target: Date | null,
+  completionPct: number,
+  now = new Date(),
+): ScheduleStatus | null {
+  if (!target) return null;
+  const span = target.getTime() - start.getTime();
+  if (span <= 0) return null;
+  const elapsedPct = Math.max(
+    0,
+    Math.min(100, Math.round(((now.getTime() - start.getTime()) / span) * 100)),
+  );
+  const pastDeadline = now > target && completionPct < 100;
+  const behind = completionPct < elapsedPct - 10;
+  const label: ScheduleStatus["label"] = pastDeadline
+    ? "Past deadline"
+    : behind
+      ? "Behind schedule"
+      : "On schedule";
+  return { elapsedPct, behind: behind || pastDeadline, label };
+}

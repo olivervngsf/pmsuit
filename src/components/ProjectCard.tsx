@@ -1,6 +1,13 @@
 import Link from "next/link";
 import type { ProjectRollup } from "@/lib/queries";
-import { HealthBadge, ProgressBar, TeamChip, KeyTag } from "./ui";
+import {
+  HealthBadge,
+  ProgressBar,
+  TeamChip,
+  KeyTag,
+  Deadline,
+  AlignmentChip,
+} from "./ui";
 import { fmtShortDate, relativeDays } from "@/lib/format";
 
 export function ProjectCard({ project }: { project: ProjectRollup }) {
@@ -19,13 +26,14 @@ export function ProjectCard({ project }: { project: ProjectRollup }) {
           <div className="truncate font-medium text-white group-hover:text-brand-soft">
             {project.name}
           </div>
-          {project.initiative && (
-            <div className="mt-0.5 truncate text-xs text-slate-500">
-              ◆ {project.initiative.name}
-            </div>
-          )}
         </div>
         <HealthBadge health={project.health} />
+      </div>
+
+      {/* Commitment + alignment, made visible up front. */}
+      <div className="mt-2 flex flex-wrap items-center gap-1.5">
+        <Deadline date={project.targetDate} done={project.status === "COMPLETED"} />
+        <AlignmentChip initiative={project.initiative} />
       </div>
 
       {project.impact && (

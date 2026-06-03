@@ -1,11 +1,13 @@
 // Small shared presentational primitives used across pages.
 import Link from "next/link";
+import { CalendarClock, Link2, AlertTriangle } from "lucide-react";
 import {
   HEALTH_META,
   STATUS_LABEL,
   type Health,
   type LifecycleStatus,
 } from "@/lib/types";
+import { fmtShortDate } from "@/lib/format";
 
 export function HealthBadge({ health }: { health: Health }) {
   const m = HEALTH_META[health];
@@ -147,6 +149,78 @@ export function KeyTag({
     >
       {id}
     </span>
+  );
+}
+
+// A deadline is a commitment — show the date and a countdown, loud when slipping.
+export function Deadline({
+  date,
+  done = false,
+  className = "",
+}: {
+  date: Date | string | null | undefined;
+  done?: boolean;
+  className?: string;
+}) {
+  if (!date) {
+    return (
+      <span className={`chip bg-surface-overlay text-slate-500 ${className}`}>
+        <CalendarClock className="h-3 w-3" /> No deadline
+      </span>
+    );
+  }
+  const d = typeof date === "string" ? new Date(date) : date;
+  const days = Math.round((d.getTime() - Date.now()) / 86400000);
+  const overdue = !done && days < 0;
+  const soon = !done && days >= 0 && days <= 7;
+  const cls = done
+    ? "bg-emerald-500/10 text-emerald-300"
+    : overdue
+      ? "bg-rose-500/15 text-rose-300"
+      : soon
+        ? "bg-amber-500/15 text-amber-300"
+        : "bg-surface-overlay text-slate-300";
+  const label = done
+    ? "Delivered"
+    : overdue
+      ? `${Math.abs(days)}d overdue`
+      : days === 0
+        ? "Due today"
+        : `${days}d left`;
+  return (
+    <span className={`chip ${cls} ${className}`}>
+      <CalendarClock className="h-3 w-3" />
+      {fmtShortDate(d)} · {label}
+    </span>
+  );
+}
+
+// Shows how a project aligns — which initiative it serves — or warns when it
+// ladders up to nothing (i.e. its business value is unclear).
+export function AlignmentChip({
+  initiative,
+}: {
+  initiative: { id: string; name: string } | null;
+}) {
+  if (!initiative) {
+    return (
+      <span
+        className="chip border border-amber-500/30 bg-amber-500/10 text-amber-300"
+        title="Not linked to any initiative — is this project meaningful?"
+      >
+        <AlertTriangle className="h-3 w-3" /> Unaligned
+      </span>
+    );
+  }
+  return (
+    <Link
+      href={`/initiatives/${initiative.id}`}
+      className="chip border border-brand/30 bg-brand/10 text-brand-soft hover:bg-brand/20"
+      title={`Aligned to: ${initiative.name}`}
+    >
+      <Link2 className="h-3 w-3" />
+      <span className="max-w-[12rem] truncate">{initiative.name}</span>
+    </Link>
   );
 }
 

@@ -48,6 +48,9 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
 | Roadmap calendar view (projects by month, Q1–Q4) + shareable view switcher | ✅ | `?view=calendar` in URL; Grid/Calendar toggle |
 | Team filter on Projects (saved in URL, shareable) | ✅ | `?team=…`; applies to grid + calendar + stats |
+| Deadline visibility (date + countdown, urgency color) | ✅ | `Deadline` badge on cards & project detail |
+| Schedule vs progress (time elapsed vs work done) | ✅ | `scheduleStatus`; flags behind / past deadline |
+| Alignment surfaced + "Unaligned" flag (no initiative) | ✅ | `AlignmentChip` on cards & detail |
 | Demo seed (fake company / teams / people / work) | ✅ | `prisma/seed.ts` |
 
 ## Design Debts (product · design · strategy)

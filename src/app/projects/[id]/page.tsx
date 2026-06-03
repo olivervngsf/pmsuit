@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { getProject } from "@/lib/queries";
-import { velocityTrend } from "@/lib/insights";
+import { velocityTrend, scheduleStatus } from "@/lib/insights";
 import {
   HealthBadge,
   ProgressBar,
@@ -11,12 +11,14 @@ import {
   Trend,
   SectionTitle,
   KeyTag,
+  Deadline,
+  AlignmentChip,
 } from "@/components/ui";
 import { TaskBoard } from "@/components/TaskBoard";
 import { Ownership } from "@/components/Ownership";
 import { RunCheckIn } from "@/components/RunCheckIn";
 import { CheckInCard } from "@/components/CheckInCard";
-import { fmtDate, fmtShortDate, relativeDays } from "@/lib/format";
+import { fmtShortDate, relativeDays } from "@/lib/format";
 
 // Pre-render every project page at build time (static export).
 export async function generateStaticParams() {
@@ -36,6 +38,11 @@ export default async function ProjectPage({
   const m = project.metrics;
   const trend = velocityTrend(m);
   const drift = project.signal.suggested !== project.health;
+  const schedule = scheduleStatus(
+    project.startDate,
+    project.targetDate,
+    m.completionPct,
+  );
 
   return (
     <div>
@@ -73,13 +80,15 @@ export default async function ProjectPage({
             <p className="mt-1.5 text-sm text-slate-400">{project.description}</p>
           )}
           <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+            <Deadline
+              date={project.targetDate}
+              done={project.status === "COMPLETED"}
+            />
+            <AlignmentChip initiative={project.initiative} />
             {project.team && (
               <TeamChip team={project.team} href={`/teams/${project.team.slug}`} />
             )}
             {project.lead && <span>Lead: {project.lead}</span>}
-            {project.targetDate && (
-              <span>· Target {fmtDate(project.targetDate)}</span>
-            )}
           </div>
         </div>
         <RunCheckIn
@@ -130,8 +139,33 @@ export default async function ProjectPage({
         />
       </div>
 
-      <div className="mt-6">
-        <ProgressBar pct={m.completionPct} color={project.team?.color} />
+      {/* Work done vs. time elapsed — is the commitment on track for its date? */}
+      <div className="mt-6 space-y-2">
+        <div>
+          <div className="mb-1 flex items-center justify-between text-xs">
+            <span className="text-slate-500">Work done</span>
+            <span className="text-slate-400">{m.completionPct}%</span>
+          </div>
+          <ProgressBar pct={m.completionPct} color={project.team?.color} />
+        </div>
+        {schedule && (
+          <div>
+            <div className="mb-1 flex items-center justify-between text-xs">
+              <span className="text-slate-500">Time elapsed</span>
+              <span
+                className={
+                  schedule.behind ? "text-rose-300" : "text-emerald-300"
+                }
+              >
+                {schedule.elapsedPct}% · {schedule.label}
+              </span>
+            </div>
+            <ProgressBar
+              pct={schedule.elapsedPct}
+              color={schedule.behind ? "#fb7185" : "#475569"}
+            />
+          </div>
+        )}
       </div>
 
       <section className="mt-8">

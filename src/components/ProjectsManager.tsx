@@ -1,0 +1,331 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
+import { useLocalStore, localId } from "@/lib/useLocalStore";
+import { Modal, Field, TextInput, TextArea, Select } from "./Modal";
+import { HealthBadge, ProgressBar, StatCard, TeamChip } from "./ui";
+import { STATUS_LABEL, type Health, type LifecycleStatus } from "@/lib/types";
+
+export type LocalProject = {
+  id: string;
+  name: string;
+  impact: string;
+  status: string;
+  health: string;
+  teamSlug: string | null;
+  teamName: string | null;
+  teamColor: string | null;
+  owner: string | null;
+  initiativeName: string | null;
+  // Snapshot metrics (0 for user-created projects).
+  total: number;
+  done: number;
+  blocked: number;
+  overdue: number;
+  completionPct: number;
+};
+
+type TeamOpt = { slug: string; name: string; color: string };
+
+const STATUSES: LifecycleStatus[] = [
+  "PLANNING",
+  "ACTIVE",
+  "ON_HOLD",
+  "COMPLETED",
+  "ARCHIVED",
+];
+const HEALTHS: Health[] = ["ON_TRACK", "AT_RISK", "OFF_TRACK"];
+
+const emptyDraft = (): LocalProject => ({
+  id: "",
+  name: "",
+  impact: "",
+  status: "PLANNING",
+  health: "ON_TRACK",
+  teamSlug: null,
+  teamName: null,
+  teamColor: null,
+  owner: "",
+  initiativeName: null,
+  total: 0,
+  done: 0,
+  blocked: 0,
+  overdue: 0,
+  completionPct: 0,
+});
+
+export function ProjectsManager({
+  seed,
+  teams,
+}: {
+  seed: LocalProject[];
+  teams: TeamOpt[];
+}) {
+  const { items, add, update, remove, reset, hydrated } = useLocalStore<LocalProject>(
+    "pmsuit:projects",
+    seed,
+  );
+
+  const [editing, setEditing] = useState<LocalProject | null>(null);
+  const [draft, setDraft] = useState<LocalProject>(emptyDraft());
+  const [formOpen, setFormOpen] = useState(false);
+
+  const stats = useMemo(() => {
+    const active = items.filter((p) => p.status === "ACTIVE").length;
+    const atRisk = items.filter((p) => p.health !== "ON_TRACK").length;
+    const blocked = items.reduce((a, p) => a + (p.blocked || 0), 0);
+    return { total: items.length, active, atRisk, blocked };
+  }, [items]);
+
+  function closeForm() {
+    setDraft(emptyDraft());
+    setEditing(null);
+    setFormOpen(false);
+  }
+  function startNew() {
+    setEditing(null);
+    setDraft(emptyDraft());
+    setFormOpen(true);
+  }
+  function startEdit(p: LocalProject) {
+    setEditing(p);
+    setDraft({ ...p });
+    setFormOpen(true);
+  }
+
+  function applyTeam(slug: string) {
+    const t = teams.find((x) => x.slug === slug) ?? null;
+    setDraft((d) => ({
+      ...d,
+      teamSlug: t?.slug ?? null,
+      teamName: t?.name ?? null,
+      teamColor: t?.color ?? null,
+    }));
+  }
+
+  function save() {
+    if (!draft.name.trim()) return;
+    if (editing) {
+      update(editing.id, draft);
+    } else {
+      add({ ...draft, id: localId("proj") });
+    }
+    closeForm();
+  }
+
+  const isLocal = (id: string) => id.startsWith("proj_") || id.startsWith("loc");
+
+  return (
+    <div>
+      <div className="mb-6 flex items-start justify-between gap-3">
+        <div>
+          <h1 className="text-2xl font-semibold text-white">Projects</h1>
+          <p className="mt-1 text-sm text-slate-400">
+            Every delivery project across the company. Create, edit, and delete —
+            changes save in your browser.
+          </p>
+        </div>
+        <button onClick={startNew} className="btn btn-primary shrink-0">
+          <Plus className="h-4 w-4" /> New project
+        </button>
+      </div>
+
+      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <StatCard label="Total" value={stats.total} />
+        <StatCard label="Active" value={stats.active} />
+        <StatCard
+          label="Off track / at risk"
+          value={stats.atRisk}
+          tone={stats.atRisk > 0 ? "warn" : "good"}
+        />
+        <StatCard
+          label="Blocked tasks"
+          value={stats.blocked}
+          tone={stats.blocked > 0 ? "bad" : "good"}
+        />
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
+        {items.map((p) => (
+          <div
+            key={p.id}
+            className="card group relative p-4 transition hover:border-brand/40"
+          >
+            {/* Edit / delete actions */}
+            <div className="absolute right-2 top-2 flex gap-1 opacity-0 transition group-hover:opacity-100">
+              <button
+                onClick={() => startEdit(p)}
+                title="Edit"
+                className="rounded-md p-1.5 text-slate-400 hover:bg-surface-overlay hover:text-white"
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </button>
+              <button
+                onClick={() => {
+                  if (confirm(`Delete "${p.name}"?`)) remove(p.id);
+                }}
+                title="Delete"
+                className="rounded-md p-1.5 text-slate-400 hover:bg-rose-500/15 hover:text-rose-300"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+
+            <div className="pr-12">
+              {isLocal(p.id) ? (
+                <button
+                  onClick={() => startEdit(p)}
+                  className="text-left font-medium text-white hover:text-brand-soft"
+                >
+                  {p.name || "Untitled project"}
+                </button>
+              ) : (
+                <Link
+                  href={`/projects/${p.id}`}
+                  className="font-medium text-white hover:text-brand-soft"
+                >
+                  {p.name}
+                </Link>
+              )}
+              {p.initiativeName && (
+                <div className="mt-0.5 truncate text-xs text-slate-500">
+                  ◆ {p.initiativeName}
+                </div>
+              )}
+            </div>
+
+            {p.impact && (
+              <p className="mt-2 line-clamp-2 text-sm text-slate-400">{p.impact}</p>
+            )}
+
+            <div className="mt-3">
+              <div className="mb-1 flex items-center justify-between text-xs text-slate-500">
+                <span>
+                  {p.done}/{p.total} tasks
+                </span>
+                <span>{p.completionPct}%</span>
+              </div>
+              <ProgressBar pct={p.completionPct} color={p.teamColor ?? "#6366f1"} />
+            </div>
+
+            <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
+              <HealthBadge health={p.health as Health} />
+              {p.teamSlug && p.teamName && p.teamColor && (
+                <TeamChip
+                  team={{ slug: p.teamSlug, name: p.teamName, color: p.teamColor }}
+                />
+              )}
+              {p.owner && <span className="text-slate-500">· {p.owner}</span>}
+              {isLocal(p.id) && (
+                <span className="chip bg-brand/10 text-brand-soft">local</span>
+              )}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {hydrated && items.length === 0 && (
+        <div className="card p-10 text-center text-sm text-slate-500">
+          No projects. Click <span className="text-brand-soft">New project</span>{" "}
+          to add one.
+        </div>
+      )}
+
+      <div className="mt-6">
+        <button
+          onClick={() => {
+            if (confirm("Reset to the original demo projects?")) reset();
+          }}
+          className="inline-flex items-center gap-1.5 text-xs text-slate-500 hover:text-slate-300"
+        >
+          <RotateCcw className="h-3 w-3" /> Reset to demo data
+        </button>
+      </div>
+
+      {/* Create / edit form */}
+      <Modal
+        open={formOpen}
+        onClose={closeForm}
+        title={editing ? "Edit project" : "New project"}
+        footer={
+          <>
+            <button onClick={closeForm} className="btn">
+              Cancel
+            </button>
+            <button
+              onClick={save}
+              disabled={!draft.name.trim()}
+              className="btn btn-primary"
+            >
+              {editing ? "Save changes" : "Create project"}
+            </button>
+          </>
+        }
+      >
+        <Field label="Name">
+          <TextInput
+            value={draft.name}
+            autoFocus
+            placeholder="e.g. Fall launch campaign"
+            onChange={(e) => setDraft({ ...draft, name: e.target.value })}
+          />
+        </Field>
+        <Field label="Impact (what it delivers)">
+          <TextArea
+            value={draft.impact}
+            placeholder="The outcome this project creates…"
+            onChange={(e) => setDraft({ ...draft, impact: e.target.value })}
+          />
+        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Team">
+            <Select
+              value={draft.teamSlug ?? ""}
+              onChange={(e) => applyTeam(e.target.value)}
+            >
+              <option value="">— none —</option>
+              {teams.map((t) => (
+                <option key={t.slug} value={t.slug}>
+                  {t.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Owner (DRI)">
+            <TextInput
+              value={draft.owner ?? ""}
+              placeholder="Name"
+              onChange={(e) => setDraft({ ...draft, owner: e.target.value })}
+            />
+          </Field>
+          <Field label="Status">
+            <Select
+              value={draft.status}
+              onChange={(e) => setDraft({ ...draft, status: e.target.value })}
+            >
+              {STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {STATUS_LABEL[s]}
+                </option>
+              ))}
+            </Select>
+          </Field>
+          <Field label="Health">
+            <Select
+              value={draft.health}
+              onChange={(e) => setDraft({ ...draft, health: e.target.value })}
+            >
+              {HEALTHS.map((h) => (
+                <option key={h} value={h}>
+                  {h.replace("_", " ").toLowerCase()}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        </div>
+      </Modal>
+    </div>
+  );
+}

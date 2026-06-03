@@ -17,7 +17,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Prisma ORM + SQLite data layer | ✅ | Schema is Postgres-portable (DD-009) |
 | Tailwind theme + design tokens | ✅ | Dark surface palette, shared primitives |
 | Static export pipeline (seed-at-build) | ✅ | Dummy data baked in; $0 hosting |
-| Deployment (Vercel import) | 🟡 | User importing repo in Vercel dashboard |
+| Deployment (Vercel) | ✅ | Auto-deploys on push (branch alias live); set Production Branch to update the prod alias |
 | Project-notes convention | ✅ | CLAUDE.md + DESIGN_DECISIONS + OUTCOMES_LOG + this tracker |
 
 ## App Shell
@@ -64,7 +64,8 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | No real-data integration (still dummy) | Product | High | Swap at `queries.ts` / `seed.ts` |
 | No auth, multi-tenant, or permissions | Product | High | Single shared view today |
 | AI check-ins not persisted in the static build | Product | Med | Static demo shows a sample only |
-| Task board is click-to-advance, no drag & drop | Design | Med | Good enough for demo |
+| Task drag-and-drop is mouse-only (no touch) | Design | Low | Native HTML5 DnD; swap to a pointer-based lib for touch |
+| No way to create / edit / delete a task in the UI | Product | Med | Board only drags status; tasks come from the seed — task CRUD pending |
 | Outcome metric values updated manually | Product | Med | No metric integrations |
 | Mobile / responsive navigation incomplete | Design | Med | Sidebar hidden on small screens |
 | No trends/charts over time (point-in-time only) | Design | Med | Velocity is 7d vs prior 7d only |

@@ -514,6 +514,38 @@ async function main() {
     },
   });
 
+  // ---- Assign human-readable tracking ids (INIT-1, PRJ-1, TASK-1, …) -------
+  const initRows = await prisma.initiative.findMany({
+    orderBy: [{ order: "asc" }, { createdAt: "asc" }],
+    select: { id: true },
+  });
+  for (let i = 0; i < initRows.length; i++) {
+    await prisma.initiative.update({
+      where: { id: initRows[i].id },
+      data: { key: `INIT-${i + 1}` },
+    });
+  }
+  const projRows = await prisma.project.findMany({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  for (let i = 0; i < projRows.length; i++) {
+    await prisma.project.update({
+      where: { id: projRows[i].id },
+      data: { key: `PRJ-${i + 1}` },
+    });
+  }
+  const taskRows = await prisma.task.findMany({
+    orderBy: { createdAt: "asc" },
+    select: { id: true },
+  });
+  for (let i = 0; i < taskRows.length; i++) {
+    await prisma.task.update({
+      where: { id: taskRows[i].id },
+      data: { key: `TASK-${i + 1}` },
+    });
+  }
+
   const counts = {
     teams: teamDefs.length,
     members: memberDefs.length,

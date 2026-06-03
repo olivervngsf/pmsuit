@@ -1,6 +1,6 @@
 import Link from "next/link";
 import type { ProjectRollup } from "@/lib/queries";
-import { HealthBadge, ProgressBar, TeamChip } from "./ui";
+import { HealthBadge, ProgressBar, TeamChip, KeyTag } from "./ui";
 import { fmtShortDate, relativeDays } from "@/lib/format";
 
 export function ProjectCard({ project }: { project: ProjectRollup }) {
@@ -13,6 +13,9 @@ export function ProjectCard({ project }: { project: ProjectRollup }) {
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
+          <div className="mb-0.5">
+            <KeyTag id={project.key} />
+          </div>
           <div className="truncate font-medium text-white group-hover:text-brand-soft">
             {project.name}
           </div>

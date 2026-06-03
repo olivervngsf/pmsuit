@@ -94,6 +94,8 @@ model Member {
 // A strategic bet aligned to company needs. The top of the alignment chain.
 model Initiative {
   id          String   @id @default(cuid())
+  // Human-readable tracking id, e.g. "INIT-1".
+  key         String?  @unique
   name        String
   description String?
   // Why this matters to the company — the alignment statement.
@@ -148,6 +150,8 @@ model Outcome {
 // A delivery vehicle that creates impact toward an initiative.
 model Project {
   id          String   @id @default(cuid())
+  // Human-readable tracking id, e.g. "PRJ-1".
+  key         String?  @unique
   name        String
   description String?
   // The impact this project is expected to create — the outcome-facing summary
@@ -212,6 +216,8 @@ model ProjectContributor {
 // Execution detail. Lives under a project and stays team-internal.
 model Task {
   id          String    @id @default(cuid())
+  // Human-readable tracking id, e.g. "TASK-1".
+  key         String?   @unique
   title       String
   description String?
   // TODO | IN_PROGRESS | BLOCKED | DONE

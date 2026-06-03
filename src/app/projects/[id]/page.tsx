@@ -10,6 +10,7 @@ import {
   TeamChip,
   Trend,
   SectionTitle,
+  KeyTag,
 } from "@/components/ui";
 import { TaskBoard } from "@/components/TaskBoard";
 import { Ownership } from "@/components/Ownership";
@@ -58,6 +59,7 @@ export default async function ProjectPage({
       <header className="mt-3 mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3">
+            <KeyTag id={project.key} />
             <h1 className="text-2xl font-semibold text-white">{project.name}</h1>
             <HealthBadge health={project.health} />
           </div>

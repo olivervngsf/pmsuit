@@ -25,6 +25,7 @@ import type { Health } from "./types";
 
 export type ProjectRollup = {
   id: string;
+  key: string | null;
   name: string;
   description: string | null;
   impact: string | null;
@@ -57,6 +58,7 @@ export type OutcomeView = {
 
 export type InitiativeRollup = {
   id: string;
+  key: string | null;
   name: string;
   description: string | null;
   rationale: string | null;
@@ -89,6 +91,7 @@ function toProjectRollup(p: any, now: Date): ProjectRollup {
   });
   return {
     id: p.id,
+    key: p.key ?? null,
     name: p.name,
     description: p.description,
     impact: p.impact,
@@ -202,6 +205,7 @@ function toInitiativeRollup(init: any, now: Date): InitiativeRollup {
 
   return {
     id: init.id,
+    key: init.key ?? null,
     name: init.name,
     description: init.description,
     rationale: init.rationale,

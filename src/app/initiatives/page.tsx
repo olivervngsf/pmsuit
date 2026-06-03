@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getInitiatives } from "@/lib/queries";
-import { HealthBadge, ProgressBar, TeamChip } from "@/components/ui";
+import { HealthBadge, ProgressBar, TeamChip, KeyTag } from "@/components/ui";
 import { OutcomeRow } from "@/components/Outcome";
 
 
@@ -22,6 +22,7 @@ export default async function InitiativesPage() {
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div className="min-w-0">
                 <div className="flex items-center gap-3">
+                  <KeyTag id={init.key} />
                   <Link
                     href={`/initiatives/${init.id}`}
                     className="text-lg font-semibold text-white hover:text-brand-soft"

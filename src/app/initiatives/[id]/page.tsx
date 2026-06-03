@@ -8,6 +8,7 @@ import {
   StatCard,
   TeamChip,
   SectionTitle,
+  KeyTag,
 } from "@/components/ui";
 import { OutcomeRow } from "@/components/Outcome";
 import { ProjectCard } from "@/components/ProjectCard";
@@ -47,6 +48,7 @@ export default async function InitiativePage({
       <header className="mt-3 mb-6 flex flex-wrap items-start justify-between gap-4">
         <div className="max-w-2xl">
           <div className="flex items-center gap-3">
+            <KeyTag id={init.key} />
             <h1 className="text-2xl font-semibold text-white">{init.name}</h1>
             <HealthBadge health={init.health} />
           </div>

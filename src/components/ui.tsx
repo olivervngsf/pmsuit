@@ -132,6 +132,24 @@ export function Trend({ trend }: { trend: "up" | "down" | "flat" }) {
   return <span className={map[trend].cls}>{map[trend].icon}</span>;
 }
 
+// Human-readable tracking id, e.g. PRJ-1 / INIT-2 / TASK-9.
+export function KeyTag({
+  id,
+  className = "",
+}: {
+  id: string | null | undefined;
+  className?: string;
+}) {
+  if (!id) return null;
+  return (
+    <span
+      className={`rounded bg-surface-overlay px-1.5 py-0.5 font-mono text-[10px] font-medium tracking-wide text-slate-500 ${className}`}
+    >
+      {id}
+    </span>
+  );
+}
+
 export function EmptyState({ children }: { children: React.ReactNode }) {
   return (
     <div className="card flex items-center justify-center p-10 text-sm text-slate-500">

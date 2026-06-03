@@ -45,6 +45,8 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
+| Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
+| Roadmap calendar view (projects by month, Q1–Q4) + shareable view switcher | ✅ | `?view=calendar` in URL; Grid/Calendar toggle |
 | Demo seed (fake company / teams / people / work) | ✅ | `prisma/seed.ts` |
 
 ## Design Debts (product · design · strategy)

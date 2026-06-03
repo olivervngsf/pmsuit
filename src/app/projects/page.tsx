@@ -8,6 +8,7 @@ export default async function ProjectsPage() {
   // CRUD manager works with (it overlays localStorage edits on top of this).
   const seed: LocalProject[] = projects.map((p) => ({
     id: p.id,
+    key: p.key,
     name: p.name,
     impact: p.impact ?? "",
     status: p.status,
@@ -17,6 +18,8 @@ export default async function ProjectsPage() {
     teamColor: p.team?.color ?? null,
     owner: p.lead ?? null,
     initiativeName: p.initiative?.name ?? null,
+    startDate: p.startDate.toISOString(),
+    targetDate: p.targetDate ? p.targetDate.toISOString() : null,
     total: p.metrics.total,
     done: p.metrics.done,
     blocked: p.metrics.blocked,

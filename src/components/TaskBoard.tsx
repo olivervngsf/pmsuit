@@ -13,6 +13,7 @@ import { relativeDays } from "@/lib/format";
 
 export type BoardTask = {
   id: string;
+  key?: string | null;
   title: string;
   status: string;
   priority: string;
@@ -103,6 +104,11 @@ export function TaskBoard({ tasks }: { tasks: BoardTask[] }) {
                 >
                   <div className="text-slate-200">{t.title}</div>
                   <div className="mt-1.5 flex flex-wrap items-center gap-1.5 text-[11px]">
+                    {t.key && (
+                      <span className="font-mono text-[10px] text-slate-500">
+                        {t.key}
+                      </span>
+                    )}
                     <span className={`chip ${pri.bg} ${pri.text}`}>{pri.label}</span>
                     <span className="text-slate-600">{t.effort} pts</span>
                     {t.assignee && (

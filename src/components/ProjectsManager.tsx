@@ -1,15 +1,17 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Plus, Pencil, Trash2, RotateCcw } from "lucide-react";
+import { Plus, Pencil, Trash2, RotateCcw, LayoutGrid, CalendarDays } from "lucide-react";
 import { useLocalStore, localId } from "@/lib/useLocalStore";
 import { Modal, Field, TextInput, TextArea, Select } from "./Modal";
-import { HealthBadge, ProgressBar, StatCard, TeamChip } from "./ui";
+import { HealthBadge, ProgressBar, StatCard, TeamChip, KeyTag } from "./ui";
+import { RoadmapCalendar } from "./RoadmapCalendar";
 import { STATUS_LABEL, type Health, type LifecycleStatus } from "@/lib/types";
 
 export type LocalProject = {
   id: string;
+  key: string | null;
   name: string;
   impact: string;
   status: string;
@@ -19,6 +21,9 @@ export type LocalProject = {
   teamColor: string | null;
   owner: string | null;
   initiativeName: string | null;
+  // ISO date strings — drive the calendar/roadmap view.
+  startDate: string;
+  targetDate: string | null;
   // Snapshot metrics (0 for user-created projects).
   total: number;
   done: number;
@@ -40,6 +45,7 @@ const HEALTHS: Health[] = ["ON_TRACK", "AT_RISK", "OFF_TRACK"];
 
 const emptyDraft = (): LocalProject => ({
   id: "",
+  key: null,
   name: "",
   impact: "",
   status: "PLANNING",
@@ -49,12 +55,16 @@ const emptyDraft = (): LocalProject => ({
   teamColor: null,
   owner: "",
   initiativeName: null,
+  startDate: new Date().toISOString(),
+  targetDate: null,
   total: 0,
   done: 0,
   blocked: 0,
   overdue: 0,
   completionPct: 0,
 });
+
+type View = "grid" | "calendar";
 
 export function ProjectsManager({
   seed,
@@ -71,6 +81,33 @@ export function ProjectsManager({
   const [editing, setEditing] = useState<LocalProject | null>(null);
   const [draft, setDraft] = useState<LocalProject>(emptyDraft());
   const [formOpen, setFormOpen] = useState(false);
+
+  // Current view is encoded in the URL (?view=calendar) so it can be shared.
+  const [view, setView] = useState<View>("grid");
+  const [year, setYear] = useState<number>(new Date().getFullYear());
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("view") === "calendar") setView("calendar");
+  }, []);
+
+  function changeView(next: View) {
+    setView(next);
+    const url = new URL(window.location.href);
+    if (next === "calendar") url.searchParams.set("view", "calendar");
+    else url.searchParams.delete("view");
+    window.history.replaceState(null, "", url.toString());
+  }
+
+  // Next PRJ-n for a newly created project (after the highest existing number).
+  function nextKey(): string {
+    let max = 0;
+    for (const p of items) {
+      const m = p.key?.match(/PRJ-(\d+)/);
+      if (m) max = Math.max(max, parseInt(m[1], 10));
+    }
+    return `PRJ-${max + 1}`;
+  }
 
   const stats = useMemo(() => {
     const active = items.filter((p) => p.status === "ACTIVE").length;
@@ -110,7 +147,7 @@ export function ProjectsManager({
     if (editing) {
       update(editing.id, draft);
     } else {
-      add({ ...draft, id: localId("proj") });
+      add({ ...draft, id: localId("proj"), key: nextKey() });
     }
     closeForm();
   }
@@ -127,9 +164,34 @@ export function ProjectsManager({
             changes save in your browser.
           </p>
         </div>
-        <button onClick={startNew} className="btn btn-primary shrink-0">
-          <Plus className="h-4 w-4" /> New project
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          {/* View switcher — the choice is saved in the URL so it's shareable. */}
+          <div className="flex rounded-lg border border-line bg-surface-overlay/40 p-0.5">
+            <button
+              onClick={() => changeView("grid")}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs ${
+                view === "grid"
+                  ? "bg-brand/20 text-white"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <LayoutGrid className="h-3.5 w-3.5" /> Grid
+            </button>
+            <button
+              onClick={() => changeView("calendar")}
+              className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs ${
+                view === "calendar"
+                  ? "bg-brand/20 text-white"
+                  : "text-slate-400 hover:text-slate-200"
+              }`}
+            >
+              <CalendarDays className="h-3.5 w-3.5" /> Calendar
+            </button>
+          </div>
+          <button onClick={startNew} className="btn btn-primary">
+            <Plus className="h-4 w-4" /> New project
+          </button>
+        </div>
       </div>
 
       <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
@@ -147,6 +209,16 @@ export function ProjectsManager({
         />
       </div>
 
+      {view === "calendar" && (
+        <RoadmapCalendar
+          projects={items}
+          year={year}
+          onYearChange={setYear}
+          onEdit={startEdit}
+        />
+      )}
+
+      {view === "grid" && (
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {items.map((p) => (
           <div
@@ -174,6 +246,9 @@ export function ProjectsManager({
             </div>
 
             <div className="pr-12">
+              <div className="mb-0.5">
+                <KeyTag id={p.key} />
+              </div>
               {isLocal(p.id) ? (
                 <button
                   onClick={() => startEdit(p)}
@@ -225,6 +300,7 @@ export function ProjectsManager({
           </div>
         ))}
       </div>
+      )}
 
       {hydrated && items.length === 0 && (
         <div className="card p-10 text-center text-sm text-slate-500">
@@ -323,6 +399,20 @@ export function ProjectsManager({
                 </option>
               ))}
             </Select>
+          </Field>
+          <Field label="Target date (shows on calendar)">
+            <TextInput
+              type="date"
+              value={draft.targetDate ? draft.targetDate.slice(0, 10) : ""}
+              onChange={(e) =>
+                setDraft({
+                  ...draft,
+                  targetDate: e.target.value
+                    ? new Date(e.target.value).toISOString()
+                    : null,
+                })
+              }
+            />
           </Field>
         </div>
       </Modal>

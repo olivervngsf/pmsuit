@@ -115,7 +115,11 @@ export function Sidebar({
         )}
         <button
           onClick={toggle}
-          title={expanded ? "Collapse" : "Expand"}
+          title={
+            expanded
+              ? "Switch to Compact (icons only)"
+              : "Switch to Full (icons + text)"
+          }
           className={`flex items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-slate-400 transition hover:bg-surface-overlay hover:text-slate-200 ${
             expanded ? "" : "justify-center"
           }`}
@@ -125,7 +129,7 @@ export function Sidebar({
               expanded ? "" : "rotate-180"
             }`}
           />
-          {expanded && <span>Collapse</span>}
+          {expanded && <span>Compact</span>}
         </button>
       </div>
     </aside>

@@ -46,7 +46,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
 | Human-readable tracking IDs (`INIT-`, `PRJ-`, `TASK-`) | ✅ | `key` field; shown on cards, details, board |
-| Roadmap calendar view (projects by month, Q1–Q4) + shareable view switcher | ✅ | `?view=calendar` in URL; Grid/Calendar toggle |
+| Projects views: Cards / List / Calendar (shareable via URL) | ✅ | `?view=list`/`calendar`; calendar groups by month Q1–Q4 |
 | Team filter on Projects (saved in URL, shareable) | ✅ | `?team=…`; applies to grid + calendar + stats |
 | Deadline visibility (date + countdown, urgency color) | ✅ | `Deadline` badge on cards & project detail |
 | Schedule vs progress (time elapsed vs work done) | ✅ | `scheduleStatus`; flags behind / past deadline |

@@ -5,7 +5,6 @@ import { getTeamBySlug } from "@/lib/queries";
 import { ProjectCard } from "@/components/ProjectCard";
 import { OutcomeRow } from "@/components/Outcome";
 import { StatCard, SectionTitle } from "@/components/ui";
-import { activeProjectCounts } from "@/lib/insights";
 import { initials } from "@/lib/format";
 
 // Pre-render every team page at build time (static export).
@@ -28,7 +27,6 @@ export default async function TeamPage({
     (a, p) => a + p.metrics.velocityLast7,
     0,
   );
-  const active = activeProjectCounts(team.projects);
 
   return (
     <div>
@@ -57,23 +55,6 @@ export default async function TeamPage({
           sub={`${blocked} blocked`}
           tone={blocked > 0 ? "warn" : "good"}
         />
-      </div>
-
-      {/* Projects this team is working on, by time window. */}
-      <div className="mt-3 card p-4">
-        <div className="label mb-3">Projects worked on</div>
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { label: "This week", value: active.week },
-            { label: "This month", value: active.month },
-            { label: "This year", value: active.year },
-          ].map((s) => (
-            <div key={s.label} className="text-center">
-              <div className="text-3xl font-semibold text-white">{s.value}</div>
-              <div className="mt-1 text-xs text-slate-500">{s.label}</div>
-            </div>
-          ))}
-        </div>
       </div>
 
       {team.outcomeViews.length > 0 && (

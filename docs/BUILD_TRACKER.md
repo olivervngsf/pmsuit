@@ -42,7 +42,6 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Initiatives: list + detail (success metrics, projects, teams) | ✅ | `/initiatives` |
 | Projects: list + detail + task board | ✅ | `/projects` — click-to-advance board |
 | Teams: list + detail (people, owned outcomes) | ✅ | `/teams` |
-| Team workload metric — projects worked on this week / month / year | ✅ | `activeProjectCounts`; on team list + detail |
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
 | Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Client-side CRUD — projects (create/edit/delete) | ✅ | `useLocalStore` overlay; modal forms; per-browser |
@@ -81,6 +80,8 @@ how the workflow actually works; promote once validated.
 | Open question | What to clarify with users | Priority | Status |
 |---------------|----------------------------|----------|--------|
 | When creating a project, should users assign it to an existing initiative **and/or create a new one inline**? | How does this fit their workflow — do PMs define initiatives first (top-down) then add projects, or spin up projects then group them (bottom-up)? Is inline initiative creation worth the added complexity, or is a simple "pick existing" enough? | TBD | 🔍 Open |
+| How do users want to see analysis/metrics — scoped to **their own team**, or **org-wide / general**? | Who's the audience (an IC PM vs a head of product/exec)? Which metrics matter (workload counts, health, velocity, deadlines)? Is "this week/month/year" even the right cut, or do they think in quarters/initiatives? Pulled the team week/month/year tiles pending this. | TBD | 🔍 Open |
+| How do users want to **see projects, and why**? | What grouping/view drives their decisions — by team, initiative, deadline, owner, or status? What question are they answering when they open the list (what's late? what's mine? what's at risk?)? | TBD | 🔍 Open |
 
 ## Others
 

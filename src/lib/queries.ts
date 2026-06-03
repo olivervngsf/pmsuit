@@ -16,7 +16,6 @@ import {
   outcomeProgress,
   suggestHealth,
   daysBetween,
-  activeProjectCounts,
   type TaskMetrics,
   type HealthSignal,
 } from "./insights";
@@ -328,19 +327,15 @@ export async function getProject(id: string, now = new Date()) {
   };
 }
 
-export async function getTeams(now = new Date()) {
+export async function getTeams() {
   const teams = await prisma.team.findMany({
     orderBy: { name: "asc" },
     include: {
       members: true,
-      projects: { select: { startDate: true, targetDate: true, status: true } },
       _count: { select: { projects: true, outcomes: true } },
     },
   });
-  return teams.map((t) => ({
-    ...t,
-    active: activeProjectCounts(t.projects, now),
-  }));
+  return teams;
 }
 
 export async function getTeamBySlug(slug: string, now = new Date()) {

@@ -33,7 +33,7 @@ Stack: Next.js 15 (App Router) + TypeScript + Prisma/SQLite + Tailwind.
 
 ## Documentation convention (do it when you build it)
 
-Two living notes are maintained **as part of every build**. Both are markdown
+Three living notes are maintained **as part of every build**. All are markdown
 **tables** — keep each cell to roughly one line.
 
 - **`docs/DESIGN_DECISIONS.md`** — when a build makes a non-trivial
@@ -41,6 +41,9 @@ Two living notes are maintained **as part of every build**. Both are markdown
   (Date, Area, Decision, Rationale, Consequences). Captures the *why*.
 - **`docs/OUTCOMES_LOG.md`** — when a build delivers user-visible value, prepend
   a dated row (Date, Outcome, Impact, Status). Impact-level, not commit-level.
+- **`docs/BUILD_TRACKER.md`** — the state of the system by area (Foundation &
+  Infrastructure, App Shell, Engineer Built, Design Debts, Others). Update a
+  row's status as work lands, or add new rows / debts.
 
 Update these in the same change as the work they describe, so the repo always
 explains why it's built the way it is and what has shipped over time.

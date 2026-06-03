@@ -104,12 +104,14 @@ CheckIn → Project | Initiative   (weekly status, AI or manual)
 
 ## Project notes
 
-Two living docs are maintained as part of every build (see `CLAUDE.md`):
+Three living docs are maintained as part of every build (see `CLAUDE.md`):
 
 - [`docs/DESIGN_DECISIONS.md`](docs/DESIGN_DECISIONS.md) — the *why* behind the
   architecture, as a running table of decisions.
 - [`docs/OUTCOMES_LOG.md`](docs/OUTCOMES_LOG.md) — the *what shipped*, as a
   dated, impact-level table.
+- [`docs/BUILD_TRACKER.md`](docs/BUILD_TRACKER.md) — system state by area
+  (foundation, app shell, features, design debts), as a table.
 
 ## Project layout
 
@@ -117,6 +119,7 @@ Two living docs are maintained as part of every build (see `CLAUDE.md`):
 docs/
   DESIGN_DECISIONS.md  # running table of design decisions (the "why")
   OUTCOMES_LOG.md      # dated table of high-level outcomes (the "what")
+  BUILD_TRACKER.md     # system state by area + known debts
 prisma/
   schema.prisma        # data model (the alignment hierarchy)
   seed.ts              # DEMO data — the only place fake content lives

@@ -59,6 +59,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 
 | Debt | Type | Priority | Notes |
 |------|------|----------|-------|
+| Project form has no start date and no duration; show days between start & end | Design | Med | When a user sets start (from) and end dates, show "N days" so they know how long the project runs |
 | Create/edit/delete UI — projects done; tasks, initiatives, outcomes pending | Product | Med | Projects shipped (client-side localStorage); extend to other entities next |
 | No real-data integration (still dummy) | Product | High | Swap at `queries.ts` / `seed.ts` |
 | No auth, multi-tenant, or permissions | Product | High | Single shared view today |

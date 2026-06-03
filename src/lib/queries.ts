@@ -233,13 +233,64 @@ export async function getProject(id: string, now = new Date()) {
     where: { id },
     include: {
       ...projectInclude,
+      owner: { include: { team: true } },
+      contributors: {
+        include: { team: true, pointPerson: true },
+      },
       checkIns: { orderBy: { weekOf: "desc" }, take: 8 },
     },
   });
   if (!project) return null;
   const rollup = toProjectRollup(project, now);
+
+  // Order contributors by RACI weight so the accountable owner reads first.
+  const RACI_ORDER: Record<string, number> = {
+    ACCOUNTABLE: 0,
+    RESPONSIBLE: 1,
+    CONTRIBUTING: 2,
+    CONSULTED: 3,
+    INFORMED: 4,
+  };
+  const contributors = [...project.contributors]
+    .sort(
+      (a, b) =>
+        (RACI_ORDER[a.responsibility] ?? 9) - (RACI_ORDER[b.responsibility] ?? 9),
+    )
+    .map((c) => ({
+      id: c.id,
+      responsibility: c.responsibility,
+      team: c.team
+        ? { id: c.team.id, name: c.team.name, slug: c.team.slug, color: c.team.color }
+        : null,
+      pointPerson: c.pointPerson
+        ? {
+            id: c.pointPerson.id,
+            name: c.pointPerson.name,
+            role: c.pointPerson.role,
+            avatar: c.pointPerson.avatar,
+          }
+        : null,
+    }));
+
   return {
     ...rollup,
+    owner: project.owner
+      ? {
+          id: project.owner.id,
+          name: project.owner.name,
+          role: project.owner.role,
+          avatar: project.owner.avatar,
+          team: project.owner.team
+            ? {
+                id: project.owner.team.id,
+                name: project.owner.team.name,
+                slug: project.owner.team.slug,
+                color: project.owner.team.color,
+              }
+            : null,
+        }
+      : null,
+    contributors,
     tasks: project.tasks,
     milestones: project.milestones.sort(
       (a, b) => a.dueDate.getTime() - b.dueDate.getTime(),

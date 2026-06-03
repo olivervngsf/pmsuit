@@ -66,6 +66,7 @@ model Team {
   members   Member[]
   projects  Project[]
   outcomes  Outcome[]
+  contributions ProjectContributor[]
 
   @@index([slug])
 }
@@ -81,6 +82,11 @@ model Member {
 
   team      Team?    @relation(fields: [teamId], references: [id])
   teamId    String?
+
+  // Projects this person is the accountable owner (DRI) of.
+  ownedProjects Project[]            @relation("ProjectOwner")
+  // Projects where this person is their team's point person.
+  pointFor      ProjectContributor[] @relation("ContributorPointPerson")
 
   @@index([teamId])
 }
@@ -151,16 +157,26 @@ model Project {
   status      String   @default("ACTIVE")
   // ON_TRACK | AT_RISK | OFF_TRACK
   health      String   @default("ON_TRACK")
+  // Free-text fallback lead label (kept for back-compat; `owner` is the
+  // structured DRI and takes precedence in the UI).
   lead        String?
   startDate   DateTime @default(now())
   targetDate  DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
+  // The single accountable owner — the DRI ("directly responsible individual").
+  // One throat to choke for a cross-functional project.
+  owner       Member?     @relation("ProjectOwner", fields: [ownerId], references: [id])
+  ownerId     String?
+  // The primary owning team (the function that drives the project).
   team        Team?       @relation(fields: [teamId], references: [id])
   teamId      String?
   initiative  Initiative? @relation(fields: [initiativeId], references: [id])
   initiativeId String?
+
+  // The cross-functional teams involved, each with a point person + RACI role.
+  contributors ProjectContributor[]
 
   tasks       Task[]
   milestones  Milestone[]
@@ -168,7 +184,29 @@ model Project {
 
   @@index([status])
   @@index([teamId])
+  @@index([ownerId])
   @@index([initiativeId])
+}
+
+// Maps a project to a contributing team, with the team's point person and a
+// RACI-style responsibility. This is how a single project spans marketing,
+// design, and product while still having clear, per-function accountability.
+model ProjectContributor {
+  id             String  @id @default(cuid())
+  // ACCOUNTABLE | RESPONSIBLE | CONTRIBUTING | CONSULTED | INFORMED
+  responsibility String  @default("CONTRIBUTING")
+
+  project        Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  projectId      String
+  team           Team    @relation(fields: [teamId], references: [id])
+  teamId         String
+  // Who to talk to on this team for this project (optional).
+  pointPerson    Member? @relation("ContributorPointPerson", fields: [pointPersonId], references: [id])
+  pointPersonId  String?
+
+  @@unique([projectId, teamId])
+  @@index([projectId])
+  @@index([teamId])
 }
 
 // Execution detail. Lives under a project and stays team-internal.

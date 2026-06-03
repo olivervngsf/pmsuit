@@ -89,8 +89,10 @@ async function main() {
     { name: "Noah Schwartz", email: "noah@northwind.test", role: "Growth Marketer", team: "marketing", avatar: "📈" },
     { name: "Owen Fitzgerald", email: "owen@northwind.test", role: "Data Lead", team: "data", avatar: "📊" },
   ];
+  // name -> member id, so projects can reference owners & point people.
+  const members: Record<string, string> = {};
   for (const m of memberDefs) {
-    await prisma.member.create({
+    const created = await prisma.member.create({
       data: {
         name: m.name,
         email: m.email,
@@ -99,6 +101,7 @@ async function main() {
         teamId: teams[m.team],
       },
     });
+    members[m.name] = created.id;
   }
 
   // ---- Initiatives + outcomes + projects -----------------------------------
@@ -120,6 +123,20 @@ async function main() {
       health: "ON_TRACK" | "AT_RISK" | "OFF_TRACK";
       targetInDays?: number;
       startedDaysAgo?: number;
+      // The single accountable owner (DRI), by member name.
+      owner: string;
+      // Cross-functional teams involved. The owning team is added automatically
+      // as ACCOUNTABLE (with the owner as its point person) if not listed here.
+      contributors?: {
+        team: string;
+        pointPerson?: string;
+        responsibility?:
+          | "ACCOUNTABLE"
+          | "RESPONSIBLE"
+          | "CONTRIBUTING"
+          | "CONSULTED"
+          | "INFORMED";
+      }[];
       tasks: TaskSpec[];
       milestones: { name: string; dueInDays: number; status?: string }[];
     },
@@ -132,12 +149,34 @@ async function main() {
         status: p.status ?? "ACTIVE",
         health: p.health,
         lead: p.lead,
+        ownerId: members[p.owner],
         teamId: teams[p.team],
         initiativeId,
         startDate: daysAgo(p.startedDaysAgo ?? 40),
         targetDate: p.targetInDays != null ? daysFromNow(p.targetInDays) : null,
       },
     });
+
+    // Ensure the owning team is represented as ACCOUNTABLE, then layer on any
+    // additional cross-functional contributors.
+    const contribs = [...(p.contributors ?? [])];
+    if (!contribs.some((c) => c.team === p.team)) {
+      contribs.unshift({
+        team: p.team,
+        pointPerson: p.owner,
+        responsibility: "ACCOUNTABLE",
+      });
+    }
+    for (const c of contribs) {
+      await prisma.projectContributor.create({
+        data: {
+          projectId: project.id,
+          teamId: teams[c.team],
+          pointPersonId: c.pointPerson ? members[c.pointPerson] : null,
+          responsibility: c.responsibility ?? "CONTRIBUTING",
+        },
+      });
+    }
 
     for (const t of p.tasks) {
       const created = await prisma.task.create({
@@ -197,6 +236,11 @@ async function main() {
     name: "SSO & SCIM provisioning",
     team: "engineering",
     lead: "Wei Chen",
+    owner: "Wei Chen",
+    contributors: [
+      { team: "product", pointPerson: "Jordan Park", responsibility: "CONSULTED" },
+      { team: "design", pointPerson: "Liam O'Brien", responsibility: "CONTRIBUTING" },
+    ],
     impact: "Unblocks 3 gated enterprise deals worth ~$900K ARR by supporting SAML login and automated user provisioning.",
     health: "AT_RISK",
     targetInDays: 21,
@@ -217,6 +261,10 @@ async function main() {
     name: "SOC 2 Type II readiness",
     team: "engineering",
     lead: "Marcus Lee",
+    owner: "Marcus Lee",
+    contributors: [
+      { team: "product", pointPerson: "Jordan Park", responsibility: "INFORMED" },
+    ],
     impact: "Removes the #1 procurement blocker for regulated buyers; required by 6 of 9 open enterprise opportunities.",
     health: "ON_TRACK",
     targetInDays: 55,
@@ -236,6 +284,11 @@ async function main() {
     name: "Enterprise onboarding revamp",
     team: "product",
     lead: "Jordan Park",
+    owner: "Jordan Park",
+    contributors: [
+      { team: "design", pointPerson: "Liam O'Brien", responsibility: "CONTRIBUTING" },
+      { team: "engineering", pointPerson: "Hannah Kim", responsibility: "CONTRIBUTING" },
+    ],
     impact: "Cuts white-glove onboarding from 6 weeks to 2, raising the number of enterprise accounts a CSM can land per quarter.",
     health: "ON_TRACK",
     targetInDays: 40,
@@ -273,6 +326,12 @@ async function main() {
     name: "Onboarding redesign",
     team: "design",
     lead: "Sofia Alvarez",
+    owner: "Sofia Alvarez",
+    contributors: [
+      { team: "engineering", pointPerson: "Hannah Kim", responsibility: "RESPONSIBLE" },
+      { team: "product", pointPerson: "Aisha Mohammed", responsibility: "CONSULTED" },
+      { team: "data", pointPerson: "Owen Fitzgerald", responsibility: "CONSULTED" },
+    ],
     impact: "A guided, role-aware setup that gets new teams to first value in under 10 minutes — directly moves activation rate.",
     health: "ON_TRACK",
     targetInDays: 18,
@@ -288,6 +347,11 @@ async function main() {
     name: "Lifecycle email program",
     team: "marketing",
     lead: "Noah Schwartz",
+    owner: "Noah Schwartz",
+    contributors: [
+      { team: "engineering", pointPerson: "Hannah Kim", responsibility: "CONTRIBUTING" },
+      { team: "product", pointPerson: "Aisha Mohammed", responsibility: "CONSULTED" },
+    ],
     impact: "Behavior-triggered emails that pull stalled new teams back into setup — recovers otherwise-lost activations.",
     health: "ON_TRACK",
     targetInDays: 25,
@@ -325,6 +389,12 @@ async function main() {
     name: "Website relaunch",
     team: "design",
     lead: "Sofia Alvarez",
+    owner: "Sofia Alvarez",
+    contributors: [
+      { team: "marketing", pointPerson: "Dani Brooks", responsibility: "RESPONSIBLE" },
+      { team: "engineering", pointPerson: "Tomás Rivera", responsibility: "RESPONSIBLE" },
+      { team: "product", pointPerson: "Jordan Park", responsibility: "CONSULTED" },
+    ],
     impact: "A clearer story and faster site that lifts organic signup conversion — the top of the entire demand funnel.",
     health: "OFF_TRACK",
     targetInDays: 12,
@@ -345,6 +415,10 @@ async function main() {
     name: "Content engine",
     team: "marketing",
     lead: "Dani Brooks",
+    owner: "Dani Brooks",
+    contributors: [
+      { team: "design", pointPerson: "Liam O'Brien", responsibility: "CONTRIBUTING" },
+    ],
     impact: "A repeatable publishing system that compounds organic traffic and inbound pipeline over the quarter.",
     health: "AT_RISK",
     targetInDays: 45,
@@ -382,6 +456,7 @@ async function main() {
     name: "Observability rollout",
     team: "engineering",
     lead: "Tomás Rivera",
+    owner: "Tomás Rivera",
     impact: "Tracing and SLO dashboards across services so we catch regressions before customers do — protects uptime.",
     health: "ON_TRACK",
     targetInDays: 28,
@@ -396,6 +471,10 @@ async function main() {
     name: "Database sharding",
     team: "engineering",
     lead: "Wei Chen",
+    owner: "Wei Chen",
+    contributors: [
+      { team: "data", pointPerson: "Owen Fitzgerald", responsibility: "CONSULTED" },
+    ],
     impact: "Horizontal scaling for the largest accounts, directly lowering p95 latency under load.",
     health: "ON_TRACK",
     status: "PLANNING",

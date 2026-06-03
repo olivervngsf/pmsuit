@@ -12,6 +12,7 @@ import {
   SectionTitle,
 } from "@/components/ui";
 import { TaskBoard } from "@/components/TaskBoard";
+import { Ownership } from "@/components/Ownership";
 import { RunCheckIn } from "@/components/RunCheckIn";
 import { CheckInCard } from "@/components/CheckInCard";
 import { fmtDate, fmtShortDate, relativeDays } from "@/lib/format";
@@ -130,6 +131,11 @@ export default async function ProjectPage({
       <div className="mt-6">
         <ProgressBar pct={m.completionPct} color={project.team?.color} />
       </div>
+
+      <section className="mt-8">
+        <SectionTitle>Ownership &amp; accountability</SectionTitle>
+        <Ownership owner={project.owner} contributors={project.contributors} />
+      </section>
 
       <section className="mt-8">
         <SectionTitle>Tasks</SectionTitle>

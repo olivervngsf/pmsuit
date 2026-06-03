@@ -28,6 +28,8 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Global styles: cards, chips, buttons, progress bars | ✅ | `ui.tsx`, `globals.css` |
 | Responsive max-width content container | ✅ | `layout.tsx` |
 | Mobile navigation (hamburger menu) | ⚠️ | Sidebar hidden below `md`; no menu yet |
+| Compact / collapsible sidebar (icon rail) | ⬜ | Requested — Teramind-style expand/collapse |
+| Refined per-tab icons | ⬜ | Requested — icon set matched to each section |
 
 ## Engineer Built (shipped features)
 
@@ -41,13 +43,14 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 | Projects: list + detail + task board | ✅ | `/projects` — click-to-advance board |
 | Teams: list + detail (people, owned outcomes) | ✅ | `/teams` |
 | Weekly check-in (AI + deterministic fallback) | ✅ | `ai.ts`, `checkin-service.ts`, `/insights` |
+| Project ownership (DRI + cross-functional RACI contributors) | ✅ | `ProjectContributor` model; shown on project detail |
 | Demo seed (fake company / teams / people / work) | ✅ | `prisma/seed.ts` |
 
 ## Design Debts (product · design · strategy)
 
 | Debt | Type | Priority | Notes |
 |------|------|----------|-------|
-| No create / edit / delete UI — data only via seed | Product | High | Needs forms + write paths |
+| No create / edit / delete UI — data only via seed | Product | High | Requested next — needs a persistence decision (static demo has no backend; see notes) |
 | No real-data integration (still dummy) | Product | High | Swap at `queries.ts` / `seed.ts` |
 | No auth, multi-tenant, or permissions | Product | High | Single shared view today |
 | AI check-ins not persisted in the static build | Product | Med | Static demo shows a sample only |

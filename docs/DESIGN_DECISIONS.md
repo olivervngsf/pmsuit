@@ -22,3 +22,4 @@ See `CLAUDE.md` for the standing convention.
 | DD-009 | 2026-06-02 | Data | SQLite now, but a Postgres-portable schema | Zero-config dev with a clean migration path | Only the datasource provider changes to migrate later |
 | DD-010 | 2026-06-02 | Seed | Backdate `updatedAt` via raw SQL in the seed | `@updatedAt` can't be set on create; needed to make "stale" tasks realistic | Demo shows true stale signals; uses `$executeRawUnsafe` |
 | DD-011 | 2026-06-02 | Security | Pin Next to patched `15.5.19` (CVE-2025-66478); upgrade `@anthropic-ai/sdk` to `^0.100.1` | Resolve the advisory; enable `cache_control` typing | Stays on supported, secure versions |
+| DD-012 | 2026-06-03 | Data model | Project ownership = one accountable `owner` (DRI) + `ProjectContributor` rows (team + point person + RACI role) | A cross-functional project (e.g. a campaign) needs one throat to choke plus a point person per function | Clear "who to point at"; supports many teams per project |

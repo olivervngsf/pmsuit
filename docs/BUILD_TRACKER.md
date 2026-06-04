@@ -26,6 +26,7 @@ the right section. Keep cells to ~one line. See `CLAUDE.md` for the convention.
 |------|--------|-------|
 | Root layout + sidebar navigation | ✅ | `src/components/Sidebar.tsx` |
 | Global styles: cards, chips, buttons, progress bars | ✅ | `ui.tsx`, `globals.css` |
+| Themed form controls (inputs, select chevron, date picker, number stepper) | ✅ | Native HTML + Tailwind in `Modal.tsx`; chrome normalized in `globals.css` |
 | Responsive max-width content container | ✅ | `layout.tsx` |
 | Mobile navigation (hamburger menu) | ⚠️ | Sidebar hidden below `md`; no menu yet |
 | Compact / collapsible sidebar (icon rail) | ✅ | Default compact; toggle to expand; state saved per browser |

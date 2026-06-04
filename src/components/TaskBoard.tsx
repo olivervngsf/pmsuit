@@ -11,7 +11,7 @@ import {
 } from "@/lib/types";
 import { relativeDays } from "@/lib/format";
 import { useLocalStore, localId } from "@/lib/useLocalStore";
-import { Modal, Field, TextInput, Select } from "./Modal";
+import { Modal, Field, TextInput, Select, NumberStepper } from "./Modal";
 
 export type BoardTask = {
   id: string;
@@ -299,16 +299,11 @@ export function TaskBoard({
             </Select>
           </Field>
           <Field label="Effort (points)">
-            <TextInput
-              type="number"
+            <NumberStepper
+              value={draft.effort}
+              onChange={(n) => setDraft({ ...draft, effort: n })}
               min={0}
-              value={String(draft.effort)}
-              onChange={(e) =>
-                setDraft({
-                  ...draft,
-                  effort: Math.max(0, parseInt(e.target.value || "0", 10)),
-                })
-              }
+              max={99}
             />
           </Field>
         </div>

@@ -51,3 +51,39 @@ body {
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
+/* ---------------------------------------------------------------------------
+ * Native form controls — keep them on-theme.
+ * The inputs are plain HTML elements (styled with Tailwind in Modal.tsx); these
+ * rules tame the browser-default chrome so it matches the dark UI.
+ * ------------------------------------------------------------------------- */
+input,
+select,
+textarea {
+  color-scheme: dark;
+}
+
+/* Hide the number-input spinner (renders light and clashes). Effort is typed,
+ * and the task form provides its own − / + stepper. */
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Tint the native date-picker indicator so it reads on a dark field. */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.75);
+  cursor: pointer;
+}
+
+/* Style native option lists as best the browser allows. */
+select option {
+  background-color: #1a2233;
+  color: #e2e8f0;
+}
+
